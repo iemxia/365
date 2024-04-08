@@ -19,6 +19,8 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
+    with db.engine.begin() as connection:
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_potions = {len(potions_delivered)}'))
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     return "OK"
@@ -35,13 +37,14 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into red potions.
     with db.engine.begin() as connection:
-        result = connection.execute(sqlalchemy.text('sql_to_execute'))
-    return [
-            {
-                "potion_type": [0, 100, 0, 0],
-                "quantity": 5,
-            }
-        ]
+        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
+        if green_ml > 0:
+            return [
+                    {
+                        "potion_type": [0, 100, 0, 0],
+                        "quantity": 5,
+                    }
+                ]
 
 if __name__ == "__main__":
     print(get_bottle_plan())
