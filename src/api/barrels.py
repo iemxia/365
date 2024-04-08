@@ -23,11 +23,15 @@ class Barrel(BaseModel):
 def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     """ """
     total_green_ml = 0
+    total_price = 0
     for barrel in barrels_delivered:
-        total_green_ml += barrel.ml_per_barrel
+        total_green_ml += (barrel.ml_per_barrel * barrel.quantity)
+        total_price += barrel.price
     with db.engine.begin() as connection:
-        # get the number of potions
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = {total_green_ml}'))
+        # update mL of green
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + {total_green_ml}'))
+        # update gold left
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - {total_price}'))
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
 
     return "OK"
@@ -45,6 +49,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 {
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
+                }
+            ]
+        else:  # not buying anything
+            return [
+                {
+                    "sku": "SMALL_GREEN_BARREL",
+                    "quantity": 0,
                 }
             ]
 
