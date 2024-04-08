@@ -5,7 +5,6 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 
-
 router = APIRouter(
     prefix="/bottler",
     tags=["bottler"],
@@ -20,10 +19,14 @@ class PotionInventory(BaseModel):
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
     total_potions = 0
+    ml_green = 0
+    # need to also subtract mL from inventory (100 mL per potion)
     for potion in potions_delivered:
         total_potions += potion.quantity
+        ml_green += potion.potion_type[1]
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_potions = num_green_potions + {total_potions}'))
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml - {ml_green}'))
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     return "OK"
@@ -40,7 +43,7 @@ def get_bottle_plan():
 
     # Initial logic: bottle all barrels into red potions.
     with db.engine.begin() as connection:
-        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory"))
+        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
         if green_ml > 0:
             return [
                     {
@@ -48,6 +51,8 @@ def get_bottle_plan():
                         "quantity": 5,
                     }
                 ]
+        else:
+            return []
 
 if __name__ == "__main__":
     print(get_bottle_plan())
