@@ -23,7 +23,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     # need to also subtract mL from inventory (100 mL per potion)
     for potion in potions_delivered:
         total_potions += potion.quantity
-        ml_green += potion.potion_type[1]
+        ml_green += (potion.potion_type[1] * potion.quantity)
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_potions = num_green_potions + {total_potions}'))
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml - {ml_green}'))
@@ -45,10 +45,11 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
         if green_ml > 0:
+            potions_to_bottle = green_ml // 100
             return [
                     {
                         "potion_type": [0, 100, 0, 0],
-                        "quantity": 5,
+                        "quantity": potions_to_bottle,
                     }
                 ]
         else:

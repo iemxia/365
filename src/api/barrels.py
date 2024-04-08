@@ -26,7 +26,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     total_price = 0
     for barrel in barrels_delivered:
         total_green_ml += (barrel.ml_per_barrel * barrel.quantity)
-        total_price += barrel.price
+        total_price += (barrel.price * barrel.quantity)
     with db.engine.begin() as connection:
         # update mL of green
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + {total_green_ml}'))
