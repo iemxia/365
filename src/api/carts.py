@@ -111,5 +111,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         # update number of green potions, and make sure it doesn't go below 0
         connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_green_potions = num_green_potions - 1"))
         # update gold
-        connection.execute(sqlalchemy.text("UPDATE gold SET gold = gold + 50"))
+        connection.execute(sqlalchemy.text("UPDATE global_inventory SET gold = gold + 50"))
     return {"total_potions_bought": 1, "total_gold_paid": 50}
