@@ -11,7 +11,7 @@ class MyCustomer:
         self.potions  = potions
         self.gold_paid = gold_paid
 
-card_id = 0
+cart_id = 0
 
 cart_dic = {}
 
