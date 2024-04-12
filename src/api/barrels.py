@@ -43,6 +43,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     return "OK"
 
 # Gets called once a day
+# log the wholesale catalog and look for pattern
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
@@ -53,7 +54,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         blue_potions_num = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
         red_potions_num = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
-        if red_potions_num < 5:
+        if red_potions_num < 10:
             return [
                 {
                     "sku": "SMALL_RED_BARREL",
@@ -67,7 +68,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                     "quantity": 1,
                 }
             ]
-        elif green_potions_num < 5:
+        elif green_potions_num < 10:
             return [
                 {
                     "sku": "SMALL_GREEN_BARREL",

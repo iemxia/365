@@ -16,16 +16,38 @@ def get_catalog():
         num_green = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar_one()
         num_red = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
         num_blue = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
-        if num_green > 10:
-            return [
+        res = []
+        if num_red > 1:
+            res.append(
+                    {
+                        "sku": "RED_POTION_0",
+                        "name": "red potion",
+                        "quantity": num_red,
+                        "price": 45,
+                        #[r, g, b, d]
+                        "potion_type": [100, 0, 0, 0],
+                    }
+            )
+        if num_green > 1:
+            res.append(
                     {
                         "sku": "GREEN_POTION_0",
                         "name": "green potion",
-                        "quantity": 1,
+                        "quantity": num_green,
                         "price": 50,
                         #[r, g, b, d]
                         "potion_type": [0, 100, 0, 0],
                     }
-                ]
-        else:
-            return []
+            )
+        if num_blue > 1:
+            res.append(
+                    {
+                        "sku": "BLUE_POTION_0",
+                        "name": "blue potion",
+                        "quantity": num_blue,
+                        "price": 65,
+                        #[r, g, b, d]
+                        "potion_type": [0, 0, 100, 0],
+                    }
+            )
+        return res
