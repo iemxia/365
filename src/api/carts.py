@@ -86,6 +86,7 @@ class Customer(BaseModel):
     character_class: str
     level: int
 
+
 # log the visit and customer list
 @router.post("/visits/{visit_id}")
 def post_visits(visit_id: int, customers: list[Customer]):
@@ -149,7 +150,6 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions - {green}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = num_red_potions - {red}"))
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_blue_potions - {blue}"))
-
         # update gold
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {gold_gained}"))
     return {"total_potions_bought": 1, "total_gold_paid": gold_gained}
