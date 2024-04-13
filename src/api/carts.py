@@ -23,15 +23,18 @@ router = APIRouter(
     dependencies=[Depends(auth.get_api_key)],
 )
 
+
 class search_sort_options(str, Enum):
     customer_name = "customer_name"
     item_sku = "item_sku"
     line_item_total = "line_item_total"
     timestamp = "timestamp"
 
+
 class search_sort_order(str, Enum):
     asc = "asc"
     desc = "desc"   
+
 
 @router.get("/search/", tags=["search"])
 def search_orders(
@@ -152,4 +155,4 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_blue_potions - {blue}"))
         # update gold
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {gold_gained}"))
-    return {"total_potions_bought": 1, "total_gold_paid": gold_gained}
+    return {"total_potions_bought": red + green + blue, "total_gold_paid": gold_gained}
