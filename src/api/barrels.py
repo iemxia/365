@@ -44,6 +44,10 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
 
 # Gets called once a day
 # log the wholesale catalog and look for pattern
+# SMALL_GREEN and SMALL_RED barrels: 500 mL and cost 100 gold
+# SMALL_BLUE: 500 mL cost 120 gold
+# MEDIUM_RED and GREEN: 2500 mL cost 250 gold
+# MEDIUM_BLUE: 2500 mL cost 300 gold
 @router.post("/plan")
 def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     """ """
@@ -54,27 +58,46 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         blue_potions_num = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
         red_potions_num = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
-        if red_potions_num < 10:
-            return [
+        gold_to_spend = 0
+        res = []
+        if blue_potions_num < 10 and gold >= 300:
+            res.append(
                 {
-                    "sku": "SMALL_RED_BARREL",
+                    "sku": "MEDIUM_BLUE_BARREL",
                     "quantity": 1,
                 }
-            ]
-        elif blue_potions_num < 5 & gold >= 120:
-            return [
+            )
+            gold_to_spend += 300
+        elif blue_potions_num < 10 and gold >= 120:
+            res.append(
                 {
                     "sku": "SMALL_BLUE_BARREL",
                     "quantity": 1,
                 }
-            ]
-        elif green_potions_num < 10:
-            return [
+            )
+            gold_to_spend += 120
+        if red_potions_num < 10 and (gold - gold_to_spend) >= 250:
+            res.append(
+                {
+                    "sku": "MEDIUM_RED_BARREL",
+                    "quantity": 1,
+                }
+            )
+            gold_to_spend += 250
+        elif red_potions_num < 10 and (gold - gold_to_spend) >= 100:
+            res.append(
+                {
+                    "sku": "SMALL_RED_BARREL",
+                    "quantity": 1,
+                }
+            )
+            gold_to_spend += 100
+        if green_potions_num < 10 and (gold - gold_to_spend) >= 100:
+            res.append(
                 {
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
                 }
-            ]
-        else:  # not buying anything
-            return []
+            )
+        return res
 
