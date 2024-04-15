@@ -57,10 +57,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         green_potions_num = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar_one()
         blue_potions_num = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
         red_potions_num = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
+        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
+        blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
+        red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
         gold_to_spend = 0
         res = []
-        if blue_potions_num < 10 and gold >= 300:
+        if blue_potions_num < 10 and (gold >= 300) and blue_ml <= 1000:
             res.append(
                 {
                     "sku": "MEDIUM_BLUE_BARREL",
@@ -68,7 +71,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 300
-        elif blue_potions_num < 10 and gold >= 120:
+        elif blue_potions_num < 10 and (gold >= 120) and (blue_ml <= 500):
             res.append(
                 {
                     "sku": "SMALL_BLUE_BARREL",
@@ -76,7 +79,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 120
-        if red_potions_num < 10 and (gold - gold_to_spend) >= 250:
+        if red_potions_num < 10 and (gold - gold_to_spend) >= 250 and (red_ml <= 1000):
             res.append(
                 {
                     "sku": "MEDIUM_RED_BARREL",
@@ -84,7 +87,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 250
-        elif red_potions_num < 10 and (gold - gold_to_spend) >= 100:
+        elif red_potions_num < 10 and (gold - gold_to_spend) >= 100 and (red_ml <= 500):
             res.append(
                 {
                     "sku": "SMALL_RED_BARREL",
@@ -92,7 +95,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 100
-        if green_potions_num < 10 and (gold - gold_to_spend) >= 100:
+        if green_potions_num < 10 and (gold - gold_to_spend) >= 100 and (green_ml <= 1500):
             res.append(
                 {
                     "sku": "SMALL_GREEN_BARREL",
