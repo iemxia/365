@@ -145,7 +145,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     red = cart.potions[0]
     green = cart.potions[1]
     blue = cart.potions[2]
-    prices = [45, 50, 65]  # red, green, blue
+    prices = [45, 50, 70]  # red, green, blue
     gold_gained = (red * prices[0]) + (green * prices[1]) + (blue * prices[2])
     print("gold gained: ", gold_gained)
  
