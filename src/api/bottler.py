@@ -71,11 +71,17 @@ def get_bottle_plan():
         res = []
         
         #[r, g, b, d]
-        if green_ml >= 500:
+        if green_ml >= (100 * potion_per_color):
             res.append(
                     {
                         "potion_type": [0, 100, 0, 0],
-                        "quantity": 5,
+                        "quantity": potion_per_color,
+                    })
+        elif green_ml >= 100:
+             res.append(
+                    {
+                        "potion_type": [0, 100, 0, 0],
+                        "quantity": green_ml // 100
                     })
         if red_ml >= (100 * potion_per_color):
             res.append(
@@ -83,11 +89,11 @@ def get_bottle_plan():
                         "potion_type": [100, 0, 0, 0],
                         "quantity": potion_per_color
                     })
-        elif red_ml >= 500:
+        elif red_ml >= 100:
             res.append(
                     {
                         "potion_type": [100, 0, 0, 0],
-                        "quantity": 5
+                        "quantity": red_ml // 100
                     })
         if blue_ml >= (100 * potion_per_color):
             res.append(
@@ -95,11 +101,11 @@ def get_bottle_plan():
                         "potion_type": [0, 0, 100, 0],
                         "quantity": potion_per_color
                     })
-        elif blue_ml >= 500:
+        elif blue_ml >= 100:
             res.append(
                     {
                         "potion_type": [0, 0, 100, 0],
-                        "quantity": 5
+                        "quantity": blue_ml // 100
                     })
     return res
 
