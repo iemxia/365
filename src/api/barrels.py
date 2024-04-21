@@ -28,19 +28,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     total_blue_ml = 0
     total_red_ml = 0
     total_price = 0
+    total_dark_ml = 0
     for barrel in barrels_delivered:
-        if "GREEN" in barrel.sku:
+        if barrel.potion_type == [0, 1, 0, 0]:
             total_green_ml += (barrel.ml_per_barrel * barrel.quantity)
-        elif "RED" in barrel.sku:
+        elif barrel.potion_type == [1, 0, 0, 0]:
             total_red_ml += (barrel.ml_per_barrel * barrel.quantity)
-        elif "BLUE" in barrel.sku:
+        elif barrel.potion_type == [0, 0, 1, 0]:
             total_blue_ml += (barrel.ml_per_barrel * barrel.quantity)
+        elif barrel.potion_type == [0, 0, 0, 1]:
+            total_dark_ml += (barrel.ml_per_barrel * barrel.quantity)
         total_price += (barrel.price * barrel.quantity)
     with db.engine.begin() as connection:
         # update mL of green
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + {total_green_ml}'))
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_red_ml = num_red_ml + {total_red_ml}'))
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_blue_ml = num_blue_ml + {total_blue_ml}'))
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_dark_ml = num_dark_ml + {total_dark_ml}'))
         # update gold left
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - {total_price}'))
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")

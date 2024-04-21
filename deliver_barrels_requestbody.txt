@@ -1,0 +1,29 @@
+[
+  {
+    "sku": "green",
+    "ml_per_barrel": 500,
+    "potion_type": [
+      0, 1, 0, 0
+    ],
+    "price": 100,
+    "quantity": 1
+  },
+{
+    "sku": "red",
+    "ml_per_barrel": 100,
+    "potion_type": [
+      1, 0, 0, 0
+    ],
+    "price": 100,
+    "quantity": 1
+  },
+{
+    "sku": "blue",
+    "ml_per_barrel": 300,
+    "potion_type": [
+      0, 0, 1, 0
+    ],
+    "price": 100,
+    "quantity": 1
+  }
+]
