@@ -151,10 +151,10 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
         # update gold
-        total_cost = connection.execute(sqlalchemy.text("SELECT SUM(gold_cost) AS total_cost FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        total_cost = connection.execute(sqlalchemy.text("SELECT total_cost FROM carts WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
         # get total num of potions bought
-        total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS tot_potions FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        total_potions_bought = connection.execute(sqlalchemy.text("SELECT total_potions_bought FROM carts WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
         # connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
         # get all the items in the cart
         potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
