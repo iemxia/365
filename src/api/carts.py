@@ -4,18 +4,24 @@ from src.api import auth
 from enum import Enum
 import sqlalchemy
 from src import database as db
+metadata_obj = sqlalchemy.MetaData()
+capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
+global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
+potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
+carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
+cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
 
-class MyCustomer:
-    def __init__(self, name, potions, gold_paid):
-        self.name = name
-        self.potions  = potions
-        self.gold_paid = gold_paid
-    def __str__(self):
-        return f"Name: {self.name}, Potions: {self.potions}, Gold Paid: {self.gold_paid}"
+# class MyCustomer:
+#     def __init__(self, name, potions, gold_paid):
+#         self.name = name
+#         self.potions  = potions
+#         self.gold_paid = gold_paid
+#     def __str__(self):
+#         return f"Name: {self.name}, Potions: {self.potions}, Gold Paid: {self.gold_paid}"
 
-cart_id = 0
+# cart_id = 0
 
-cart_dic = {}
+# cart_dic = {}
 
 router = APIRouter(
     prefix="/carts",
@@ -104,9 +110,13 @@ def post_visits(visit_id: int, customers: list[Customer]):
 @router.post("/")
 def create_cart(new_cart: Customer):
     """ """
-    global cart_id
-    cart_id += 1
-    cart_dic[cart_id] = MyCustomer(new_cart.customer_name, [0, 0, 0, 0], 0)
+    with db.engine.begin() as connection:
+        cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_class) VALUES (:class) RETURNING cart_id"), {"class": new_cart.character_class})
+        # sqlalchemy.insert(carts),
+        #     [
+        #         {"customer_class": new_cart.character_class}
+        #     ]
+        # )
     return {"cart_id": cart_id}
 
 
@@ -118,18 +128,15 @@ class CartItem(BaseModel):
 def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     """ """
     quantity = cart_item.quantity
-    potions = cart_dic[cart_id].potions
-    gold_paid = cart_dic[cart_id].gold_paid
-     #[r, g, b, d]
-    if "BLUE" in item_sku:
-        print("blue potion now in cart")
-        potions[2] += quantity
-    if "RED" in item_sku:
-        print("red potion now in cart")
-        potions[0] += quantity
-    if "GREEN" in item_sku:
-        print("red potion now in cart")
-        potions[1] += quantity
+    with db.engine.begin() as connection:
+        potion_id = connection.execute(sqlalchemy.text("SELECT id FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
+        potion_cost = connection.execute(sqlalchemy.text("SELECT price FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
+        connection.execute(
+        sqlalchemy.insert(cart_items),
+            [
+                {"cart_id": cart_id, "id": potion_id, "quantity": quantity, "gold_cost": potion_cost * quantity}
+            ]
+        )
     return "OK"
 
 # new branch, accidentally uploaded my postgres uri to public lol
@@ -140,20 +147,18 @@ class CartCheckout(BaseModel):
 @router.post("/{cart_id}/checkout")
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
-    cart = cart_dic[cart_id]
-    print(cart)
-    red = cart.potions[0]
-    green = cart.potions[1]
-    blue = cart.potions[2]
-    prices = [45, 50, 70]  # red, green, blue
-    gold_gained = (red * prices[0]) + (green * prices[1]) + (blue * prices[2])
-    print("gold gained: ", gold_gained)
- 
     with db.engine.begin() as connection:
-        # update number of green potions, and make sure it doesn't go below 0
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_green_potions = num_green_potions - {green}"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_red_potions = num_red_potions - {red}"))
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET num_blue_potions = num_blue_potions - {blue}"))
         # update gold
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + {gold_gained}"))
-    return {"total_potions_bought": red + green + blue, "total_gold_paid": gold_gained}
+        total_cost = connection.execute(sqlalchemy.text("SELECT SUM(gold_cost) AS total_cost FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
+        # get total num of potions bought
+        total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS tot_potions FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        # update cart table
+        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
+        # get all the items in the cart
+        potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
+        for potion_id, quantity in potions:
+            # update the potion inventory for all the items they got
+            connection.execute(sqlalchemy.text(f"UPDATE potions SET quantity = quantity - :potion_num WHERE id = :id"), {"potion_num": quantity, "id": potion_id})
+
+    return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_cost}
