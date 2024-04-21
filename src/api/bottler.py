@@ -90,17 +90,12 @@ def get_bottle_plan():
         red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
         blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
         dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
-        # green_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE green_ml = 100")).scalar_one()
-        # blue_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE blue_ml = 100")).scalar_one()
-        # red_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE red_ml = 100")).scalar_one()
-        # dark_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE dark_ml = 100")).scalar_one()
-        # purple_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE potion_sku = 'astral_magenta'")).scalar_one()
-        # rgb_potions_num = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE potion_sku = 'trix_are_for_kids'")).scalar_one()
-        cap_result = connection.execute(sqlalchemy.select(capacity))
-        potion_capacity = 0
-        for id, ml_cap, potion_cap, units in cap_result:
-            print(f"ml capacity: {ml_cap * units}, potion_cap: {potion_cap * units}, units: {units}")
-            potion_capacity = potion_cap * units
+        potion_capacity = connection.execute(sqlalchemy.text("SELECT potion_capacity FROM capacity")).scalar_one()
+        # potion_capacity, ml_capacity = cap_result
+        # potion_capacity = 0
+        # for id, ml_cap, potion_cap, units in cap_result:
+        #     print(f"ml capacity: {ml_cap}, potion_cap: {potion_cap}")
+        #     potion_capacity = potion_cap 
         # total_potions = green_potions_num + blue_potions_num + red_potions_num + dark_potions_num + purple_potions_num + rgb_potions_num
         total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
         print("total potions owned: ", total_potions)

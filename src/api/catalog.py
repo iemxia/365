@@ -16,14 +16,15 @@ def get_catalog():
         potion_rows = connection.execute(sqlalchemy.text("SELECT potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
         for row in potion_rows:
             sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
-            res.append(
-                {
-                        "sku": sku,
-                        "name": sku,
-                        "quantity": quantity,
-                        "price": price,
-                        #[r, g, b, d]
-                        "potion_type": [green_ml, red_ml, blue_ml, dark_ml],
-                    }
-            )
+            if quantity > 0:
+                res.append(
+                    {
+                            "sku": sku,
+                            "name": sku,
+                            "quantity": quantity,
+                            "price": price,
+                            #[r, g, b, d]
+                            "potion_type": [green_ml, red_ml, blue_ml, dark_ml],
+                        }
+                )
         return res

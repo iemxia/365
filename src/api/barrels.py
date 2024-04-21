@@ -66,11 +66,10 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         # get the number of potions
         #cap_row = connection.execute(sqlalchemy.text("SELECT :ml_capacity, :potion_capacity, :units FROM capacity"), [{"ml_capacity": "ml_capacity", "potion_capacity": "potion_capacity", "units": "units"}]).one()
         #cap_row = connection.execute(sqlalchemy.text("SELECT ml_capacity, potion_capacity, units FROM capacity")).one()
-        cap_result = connection.execute(sqlalchemy.select(capacity))
-        ml_capacity = 0
-        for id, ml_cap, potion_cap, units in cap_result:
-            print(f"ml capacity: {ml_cap * units}, potion_cap: {potion_cap * units}, units: {units}")
-            ml_capacity = ml_cap * units
+        ml_capacity = connection.execute(sqlalchemy.text("SELECT ml_capacity FROM capacity")).scalar_one()
+        # for id, ml_cap, potion_cap, units in cap_result:
+        #     print(f"ml capacity: {ml_cap * units}, potion_cap: {potion_cap * units}, units: {units}")
+        #     ml_capacity = ml_cap * units
         for barrel in wholesale_catalog:
             if barrel.potion_type == [0, 0, 0, 1]:
                 ml_per_color = ml_capacity / 4
