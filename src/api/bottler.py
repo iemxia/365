@@ -117,7 +117,6 @@ def get_bottle_plan():
         for row in potions:
             potion_sku, red, green, blue, dark = row
             potion_res[potion_sku] = [red, green, blue, dark]
-        print(potion_res)
         if green_ml >= (100 * potion_per_color):
             res.append(
                     {

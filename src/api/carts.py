@@ -112,7 +112,7 @@ def create_cart(new_cart: Customer):
     """ """
     with db.engine.begin() as connection:
         cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_class) VALUES (:class) RETURNING cart_id"), {"class": new_cart.character_class}).scalar_one()
-        # sqlalchemy.insert(carts),
+        # connection.execute(sqlalchemy.insert(carts),
         #     [
         #         {"customer_class": new_cart.character_class}
         #     ]
@@ -132,6 +132,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         potion_id = connection.execute(sqlalchemy.text("SELECT id FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
         print("potion id:", potion_id)
         potion_cost = connection.execute(sqlalchemy.text("SELECT price FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
+        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost"), {"potions_bought": quantity, "cost": potion_cost * quantity})
         connection.execute(
         sqlalchemy.insert(cart_items),
             [
@@ -154,8 +155,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
         # get total num of potions bought
         total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS tot_potions FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
-        # update cart table
-        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
+        # connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
         # get all the items in the cart
         potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
         for potion_id, quantity in potions:
