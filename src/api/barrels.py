@@ -77,11 +77,12 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 ml_per_color = ml_capacity / 3
         print("ml per color:", ml_per_color)
         # green_potion = connection.execute(sqlalchemy.select(potions_inventory).where(potions_inventory.c.name ))
-        green_ml= connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
-        blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
-        red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
-        dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
-        gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
+        ml_gold = connection.execute(sqlalchemy.text("SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
+        gold, green_ml, blue_ml, red_ml, dark_ml = ml_gold
+        # blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
+        # red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
+        # dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
+        # gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
         res = []
