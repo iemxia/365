@@ -132,7 +132,7 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
         potion_id = connection.execute(sqlalchemy.text("SELECT id FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
         print("potion id:", potion_id)
         potion_cost = connection.execute(sqlalchemy.text("SELECT price FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
-        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost"), {"potions_bought": quantity, "cost": potion_cost * quantity})
+        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost WHERE cart_id = :id"), {"potions_bought": quantity, "cost": potion_cost * quantity, "id": cart_id})
         connection.execute(
         sqlalchemy.insert(cart_items),
             [
