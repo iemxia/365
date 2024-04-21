@@ -3,8 +3,8 @@ from pydantic import BaseModel
 from src.api import auth
 import math
 import sqlalchemy
+from sqlalchemy import exc
 from src import database as db
-
 
 router = APIRouter(
     prefix="/inventory",
@@ -68,6 +68,13 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
+    with db.engine.begin() as connection:
+        try:
+            connection.execute(sqlalchemy.text(
+                "INSERT INTO processed (job_id, type) VALUES (:order_id, 'capacity')"
+            ), {"order_id": order_id})
+        except exc.IntegrityError as e:
+            return "OK"
     potion_unit = capacity_purchase.potion_capacity // 50
     ml_unit = capacity_purchase.ml_capacity // 10000
     total_gold_spent = 1000 * (potion_unit + ml_unit)

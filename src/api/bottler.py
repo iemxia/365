@@ -3,6 +3,7 @@ from enum import Enum
 from pydantic import BaseModel
 from src.api import auth
 import sqlalchemy
+from sqlalchemy import exc
 from src import database as db
 
 metadata_obj = sqlalchemy.MetaData()
@@ -22,6 +23,13 @@ class PotionInventory(BaseModel):
 @router.post("/deliver/{order_id}")
 def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int):
     """ """
+    with db.engine.begin() as connection:
+        try:
+            connection.execute(sqlalchemy.text(
+                "INSERT INTO processed (job_id, type) VALUES (:order_id, 'potions')"
+            ), {"order_id": order_id})
+        except exc.IntegrityError as e:
+            return "OK"
     red = 0
     blue = 0
     green = 0
