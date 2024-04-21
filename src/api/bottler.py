@@ -88,17 +88,7 @@ def get_bottle_plan():
     with db.engine.begin() as connection:
         ml = connection.execute(sqlalchemy.text("SELECT num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
         green_ml, blue_ml, red_ml, dark_ml = ml
-        # green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
-        # red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
-        # blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
-        # dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
         potion_capacity = connection.execute(sqlalchemy.text("SELECT potion_capacity FROM capacity")).scalar_one()
-        # potion_capacity, ml_capacity = cap_result
-        # potion_capacity = 0
-        # for id, ml_cap, potion_cap, units in cap_result:
-        #     print(f"ml capacity: {ml_cap}, potion_cap: {potion_cap}")
-        #     potion_capacity = potion_cap 
-        # total_potions = green_potions_num + blue_potions_num + red_potions_num + dark_potions_num + purple_potions_num + rgb_potions_num
         total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
         print("total potions owned: ", total_potions)
         available_to_make = potion_capacity - total_potions
