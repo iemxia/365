@@ -35,14 +35,18 @@ def get_capacity_plan():
     Start with 1 capacity for 50 potions and 1 capacity for 10000 ml of potion. Each additional 
     capacity unit costs 1000 gold.
     """
+    ml_cap = 0
+    potion_cap = 0
     with db.engine.begin() as connection:
         gold = connection.execute(sqlalchemy.text('SELECT gold FROM global_inventory')).scalar_one()
-    if gold >= 12000:
+        capacity_results = connection.execute(sqlalchemy.text('SELECT ml_capacity, potion_capacity FROM capacity')).fetchone()
+        ml_cap, potion_cap = capacity_results
+    if gold >= 12000 and ml_cap <= 10000 and potion_cap <= 50:
         return {
         "potion_capacity": 100,
         "ml_capacity": 20000
         }
-    elif gold >= 6000:
+    elif gold >= 6000 and ml_cap <= 20000 and potion_cap <= 100:
         return {
         "potion_capacity": 50,
         "ml_capacity": 10000

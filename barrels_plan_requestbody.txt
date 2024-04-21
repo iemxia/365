@@ -1,4 +1,4 @@
-365 barrels deliver request body:
+
 [
   {
     "sku": "MEDIUM_BLUE_BARREL",
@@ -7,6 +7,15 @@
       0, 0, 100, 0
     ],
     "price": 300,
+    "quantity": 10
+  },
+ {
+    "sku": "LARGE_DARK_BARREL",
+    "ml_per_barrel": 10000,
+    "potion_type": [
+      0, 0, 0, 1
+    ],
+    "price": 700,
     "quantity": 10
   },
 {

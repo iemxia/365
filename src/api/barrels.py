@@ -64,28 +64,28 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
     with db.engine.begin() as connection:
         # get the number of potions
-        #cap_row = connection.execute(sqlalchemy.text("SELECT :ml_capacity, :potion_capacity, :units FROM capacity"), [{"ml_capacity": "ml_capacity", "potion_capacity": "potion_capacity", "units": "units"}]).one()
-        #cap_row = connection.execute(sqlalchemy.text("SELECT ml_capacity, potion_capacity, units FROM capacity")).one()
         ml_capacity = connection.execute(sqlalchemy.text("SELECT ml_capacity FROM capacity")).scalar_one()
-        # for id, ml_cap, potion_cap, units in cap_result:
-        #     print(f"ml capacity: {ml_cap * units}, potion_cap: {potion_cap * units}, units: {units}")
-        #     ml_capacity = ml_cap * units
-        for barrel in wholesale_catalog:
-            if barrel.potion_type == [0, 0, 0, 1]:
-                ml_per_color = ml_capacity / 4
-            else:
-                ml_per_color = ml_capacity / 3
-        print("ml per color:", ml_per_color)
-        # green_potion = connection.execute(sqlalchemy.select(potions_inventory).where(potions_inventory.c.name ))
         ml_gold = connection.execute(sqlalchemy.text("SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
         gold, green_ml, blue_ml, red_ml, dark_ml = ml_gold
-        # blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
-        # red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
-        # dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
-        # gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
+        dark_exist = False
+        ml_per_color = (ml_capacity - dark_ml) / 3
+        for barrel in wholesale_catalog:
+            if barrel.potion_type == [0, 0, 0, 1]:
+                ml_per_color = (ml_capacity - 10000) / 4
+                print("ml per color:", ml_per_color)
+                dark_exist = True
+        print("ml per color:", ml_per_color)
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
         res = []
+        if dark_exist and (gold >= 1000) and dark_ml <= 0 :
+            res.append(
+                 {
+                    "sku": "LAGE_DARK_BARREL",
+                    "quantity": 1,
+                }
+            )
+            gold_to_spend += 700
         if (gold >= 300) and blue_ml <= (ml_per_color - 2500):
             res.append(
                 {

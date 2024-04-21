@@ -93,7 +93,10 @@ def get_bottle_plan():
         total_potions = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
         print("total potions owned: ", total_potions)
         available_to_make = potion_capacity - total_potions
-        potion_per_color = available_to_make // 6
+        if dark_ml >= 100:
+            potion_per_color = available_to_make // 6
+        else:
+            potion_per_color = available_to_make // 5
         print("potions per color: ", potion_per_color)
         res = []
         #[r, g, b, d]
