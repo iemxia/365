@@ -4,6 +4,10 @@ from src.api import auth
 import sqlalchemy
 from src import database as db
 
+metadata_obj = sqlalchemy.MetaData()
+capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
+global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
+potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 router = APIRouter(
     prefix="/barrels",
     tags=["barrels"],
@@ -54,16 +58,29 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     print(wholesale_catalog)
     with db.engine.begin() as connection:
         # get the number of potions
-        green_potions_num = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar_one()
-        blue_potions_num = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
-        red_potions_num = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
-        green_ml = connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
+        #cap_row = connection.execute(sqlalchemy.text("SELECT :ml_capacity, :potion_capacity, :units FROM capacity"), [{"ml_capacity": "ml_capacity", "potion_capacity": "potion_capacity", "units": "units"}]).one()
+        #cap_row = connection.execute(sqlalchemy.text("SELECT ml_capacity, potion_capacity, units FROM capacity")).one()
+        cap_result = connection.execute(sqlalchemy.select(capacity))
+        ml_capacity = 0
+        for id, ml_cap, potion_cap, units in cap_result:
+            print(f"ml capacity: {ml_cap * units}, potion_cap: {potion_cap * units}, units: {units}")
+            ml_capacity = ml_cap * units
+        for barrel in wholesale_catalog:
+            if barrel.potion_type == [0, 0, 0, 1]:
+                ml_per_color = ml_capacity / 4
+            else:
+                ml_per_color = ml_capacity / 3
+        print("ml per color:", ml_per_color)
+        # green_potion = connection.execute(sqlalchemy.select(potions_inventory).where(potions_inventory.c.name ))
+        green_ml= connection.execute(sqlalchemy.text("SELECT num_green_ml FROM global_inventory")).scalar_one()
         blue_ml = connection.execute(sqlalchemy.text("SELECT num_blue_ml FROM global_inventory")).scalar_one()
         red_ml = connection.execute(sqlalchemy.text("SELECT num_red_ml FROM global_inventory")).scalar_one()
+        dark_ml = connection.execute(sqlalchemy.text("SELECT num_dark_ml FROM global_inventory")).scalar_one()
         gold = connection.execute(sqlalchemy.text("SELECT gold FROM global_inventory")).scalar_one()
+        print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
         res = []
-        if blue_potions_num < 10 and (gold >= 300) and blue_ml <= 1000:
+        if (gold >= 300) and blue_ml <= (ml_per_color - 2500):
             res.append(
                 {
                     "sku": "MEDIUM_BLUE_BARREL",
@@ -71,15 +88,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 300
-        elif blue_potions_num < 10 and (gold >= 120) and (blue_ml <= 500):
+        elif (gold >= 240) and (blue_ml <= (ml_per_color - 1000)):
+            res.append(
+                {
+                    "sku": "SMALL_BLUE_BARREL",
+                    "quantity": 2,
+                }
+            )
+            gold_to_spend += (120 * 2)
+        elif (gold >= 120) and (blue_ml <= (ml_per_color - 500)):
             res.append(
                 {
                     "sku": "SMALL_BLUE_BARREL",
                     "quantity": 1,
                 }
             )
-            gold_to_spend += 120
-        if red_potions_num < 10 and (gold - gold_to_spend) >= 250 and (red_ml <= 1000):
+            gold_to_spend += 120 
+        if (gold - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_RED_BARREL",
@@ -87,7 +112,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 250
-        elif red_potions_num < 10 and (gold - gold_to_spend) >= 100 and (red_ml <= 500):
+        elif (gold - gold_to_spend) >= 200 and (red_ml <= (ml_per_color - 1000)):
+            res.append(
+                {
+                    "sku": "SMALL_RED_BARREL",
+                    "quantity": 2,
+                }
+            )
+            gold_to_spend += 200
+        elif (gold - gold_to_spend) >= 100 and (red_ml <= (ml_per_color - 500)):
             res.append(
                 {
                     "sku": "SMALL_RED_BARREL",
@@ -95,12 +128,30 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 100
-        if green_potions_num < 10 and (gold - gold_to_spend) >= 100 and (green_ml <= 1500):
+        if (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
+            res.append(
+                {
+                    "sku": "MEDIUM_GREEN_BARREL",
+                    "quantity": 1,
+                }
+            )
+            gold_to_spend += 250
+        elif (gold - gold_to_spend) >= 200 and (green_ml <= (ml_per_color - 1000)):
+            res.append(
+                {
+                    "sku": "SMALL_GREEN_BARREL",
+                    "quantity": 2,
+                }
+            )
+            gold_to_spend += 200
+        elif (gold - gold_to_spend) >= 100 and (green_ml <= (ml_per_color - 500)):
             res.append(
                 {
                     "sku": "SMALL_GREEN_BARREL",
                     "quantity": 1,
                 }
             )
+            gold_to_spend += 100
+        print("gold spent:", gold_to_spend)
         return res
 

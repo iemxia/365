@@ -10,6 +10,15 @@
     "quantity": 10
   },
 {
+    "sku": "MEDIUM_GREEN_BARREL",
+    "ml_per_barrel": 2500,
+    "potion_type": [
+      0, 100, 0, 0
+    ],
+    "price": 250,
+    "quantity": 10
+  },
+{
     "sku": "MEDIUM_RED_BARREL",
     "ml_per_barrel": 2500,
     "potion_type": [
