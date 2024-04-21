@@ -11,43 +11,19 @@ def get_catalog():
     """
     Each unique item combination must have only a single price.
     """
-    
+    res = []
     with db.engine.begin() as connection:
-        num_green = connection.execute(sqlalchemy.text("SELECT num_green_potions FROM global_inventory")).scalar_one()
-        num_red = connection.execute(sqlalchemy.text("SELECT num_red_potions FROM global_inventory")).scalar_one()
-        num_blue = connection.execute(sqlalchemy.text("SELECT num_blue_potions FROM global_inventory")).scalar_one()
-        res = []
-        if num_red > 1:
+        potion_rows = connection.execute(sqlalchemy.text("SELECT potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
+        for row in potion_rows:
+            sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
             res.append(
-                    {
-                        "sku": "RED_POTION_0",
-                        "name": "red potion",
-                        "quantity": num_red,
-                        "price": 45,
+                {
+                        "sku": sku,
+                        "name": sku,
+                        "quantity": quantity,
+                        "price": price,
                         #[r, g, b, d]
-                        "potion_type": [100, 0, 0, 0],
-                    }
-            )
-        if num_green > 1:
-            res.append(
-                    {
-                        "sku": "GREEN_POTION_0",
-                        "name": "green potion",
-                        "quantity": num_green,
-                        "price": 50,
-                        #[r, g, b, d]
-                        "potion_type": [0, 100, 0, 0],
-                    }
-            )
-        if num_blue > 1:
-            res.append(
-                    {
-                        "sku": "BLUE_POTION_0",
-                        "name": "blue potion",
-                        "quantity": num_blue,
-                        "price": 70,
-                        #[r, g, b, d]
-                        "potion_type": [0, 0, 100, 0],
+                        "potion_type": [green_ml, red_ml, blue_ml, dark_ml],
                     }
             )
         return res

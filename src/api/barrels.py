@@ -30,6 +30,7 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     total_price = 0
     total_dark_ml = 0
     for barrel in barrels_delivered:
+        total_price += (barrel.price * barrel.quantity)
         if barrel.potion_type == [0, 1, 0, 0]:
             total_green_ml += (barrel.ml_per_barrel * barrel.quantity)
         elif barrel.potion_type == [1, 0, 0, 0]:
@@ -38,7 +39,8 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
             total_blue_ml += (barrel.ml_per_barrel * barrel.quantity)
         elif barrel.potion_type == [0, 0, 0, 1]:
             total_dark_ml += (barrel.ml_per_barrel * barrel.quantity)
-        total_price += (barrel.price * barrel.quantity)
+        else:
+            raise Exception("Invalid barrel potion type")
     with db.engine.begin() as connection:
         # update mL of green
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + :total_green_ml'), [{"total_green_ml": total_green_ml}])

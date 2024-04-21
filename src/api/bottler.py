@@ -27,6 +27,7 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     green = 0
     dark = 0
     purple = 0
+    rgb_mix = 0
     ml_green = 0
     ml_red = 0
     ml_blue = 0
@@ -50,6 +51,13 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
             ml_red += (50 * potion.quantity)
             ml_blue += (50 * potion.quantity)
             purple += potion.quantity
+        elif potion.potion_type == [33, 33, 34, 0]:
+            ml_red += (33 * potion.quantity)
+            ml_green += (33 * potion.quantity)
+            ml_blue += (34 * potion.quantity)
+            rgb_mix += potion.quantity
+        else:
+            raise Exception("Invalid Potion Type")
     with db.engine.begin() as connection:
         connection.execute(sqlalchemy.text(f'UPDATE potions SET quantity = quantity + :green WHERE green_ml = 100'), {"green": green})
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml - :ml_green'), {"ml_green": ml_green})
@@ -57,7 +65,10 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_red_ml = num_red_ml - :ml_red'), {"ml_red": ml_red})
         connection.execute(sqlalchemy.text(f'UPDATE potions SET quantity = quantity + :blue WHERE blue_ml = 100'), {"blue": blue})
         connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_blue_ml = num_blue_ml - :ml_blue'), {"ml_blue": ml_blue})
+        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_dark_ml = num_dark_ml - :ml_dark'), {"ml_dark": ml_dark})
         connection.execute(sqlalchemy.text(f'UPDATE potions SET quantity = quantity + :purple WHERE blue_ml = 50 AND red_ml = 50'), {"purple": purple})
+        connection.execute(sqlalchemy.text(f'UPDATE potions SET quantity = quantity + :rgb WHERE blue_ml = 34 AND red_ml = 33'), {"rgb": rgb_mix})
+        connection.execute(sqlalchemy.text(f'UPDATE potions SET quantity = quantity + :dark WHERE dark_ml = 100'), {"dark": dark})
     print(f"potions delievered: {potions_delivered} order_id: {order_id}")
 
     return "OK"
