@@ -34,8 +34,6 @@ def get_capacity_plan():
         gold = connection.execute(sqlalchemy.text('SELECT gold FROM global_inventory')).scalar_one()
         capacity_results = connection.execute(sqlalchemy.text('SELECT ml_capacity, potion_capacity FROM capacity')).fetchone()
         ml_cap, potion_cap = capacity_results
-        ml_cap *= 10000
-        potion_cap *= 50
     if gold >= 12000 and ml_cap <= 10000 and potion_cap <= 50:
         return {
         "potion_capacity": 2,
