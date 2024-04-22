@@ -114,14 +114,14 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     quantity = cart_item.quantity
     with db.engine.begin() as connection:
         potion_id = connection.execute(sqlalchemy.text("SELECT id FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
-        potion_inventory = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
-        try:   # try to update the catalog so that customers don't try to buy at the same time and then I don't have enough?
-            connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = quantity - :q WHERE id = :id"), {"q": quantity, "id": potion_id})
-        except exc.IntegrityError as e:
-            raise Exception(f"Cannot add to cart, in inventory: {potion_inventory}, trying to buy: {quantity}")
+        # potion_inventory = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
+        # try:   # try to update the catalog so that customers don't try to buy at the same time and then I don't have enough?
+        #     connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = quantity - :q WHERE id = :id"), {"q": quantity, "id": potion_id})
+        # except exc.IntegrityError as e:
+        #     raise Exception(f"Cannot add to cart, in inventory: {potion_inventory}, trying to buy: {quantity}")
         print(f"cart_id: {cart_id}, potion sku: {item_sku}, quantity: {quantity}")
         potion_cost = connection.execute(sqlalchemy.text("SELECT price FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
-        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost WHERE cart_id = :id"), {"potions_bought": quantity, "cost": potion_cost * quantity, "id": cart_id})
+        # connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost WHERE cart_id = :id"), {"potions_bought": quantity, "cost": potion_cost * quantity, "id": cart_id})
         connection.execute(
         sqlalchemy.insert(cart_items),
             [
@@ -140,11 +140,11 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
         # update gold
-        total_cost = connection.execute(sqlalchemy.text("SELECT total_cost FROM carts WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        total_cost = connection.execute(sqlalchemy.text("SELECT SUM(gold_cost) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
         # get total num of potions bought
-        total_potions_bought = connection.execute(sqlalchemy.text("SELECT total_potions_bought FROM carts WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
-        # connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
+        total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost"), {"potions_bought": total_potions_bought, "cost": total_cost})
         # get all the items in the cart
         potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
         for potion_id, quantity in potions:
