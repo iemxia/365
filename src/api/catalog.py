@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
-
+metadata_obj = sqlalchemy.MetaData()
+catalog = sqlalchemy.Table("catalog", metadata_obj, autoload_with=db.engine)
 
 router = APIRouter()
 
@@ -13,9 +14,15 @@ def get_catalog():
     """
     res = []
     with db.engine.begin() as connection:
-        potion_rows = connection.execute(sqlalchemy.text("SELECT potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
+        potion_rows = connection.execute(sqlalchemy.text("SELECT id, potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
+        connection.execute(sqlalchemy.text("TRUNCATE TABLE catalog"))
         for row in potion_rows:
-            sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
+            id, sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
+            connection.execute(sqlalchemy.insert(catalog),
+            [
+                {"id": id, "potion_sku": sku, "price": price, "quantity": quantity}
+            ]
+            )
             if quantity > 0:
                 res.append(
                     {

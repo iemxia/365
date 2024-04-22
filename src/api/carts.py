@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, Request
 from pydantic import BaseModel
 from src.api import auth
 from enum import Enum
+from sqlalchemy import exc
 import sqlalchemy
 from src import database as db
 metadata_obj = sqlalchemy.MetaData()
@@ -10,18 +11,6 @@ global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_w
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
 cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
-
-# class MyCustomer:
-#     def __init__(self, name, potions, gold_paid):
-#         self.name = name
-#         self.potions  = potions
-#         self.gold_paid = gold_paid
-#     def __str__(self):
-#         return f"Name: {self.name}, Potions: {self.potions}, Gold Paid: {self.gold_paid}"
-
-# cart_id = 0
-
-# cart_dic = {}
 
 router = APIRouter(
     prefix="/carts",
@@ -112,11 +101,6 @@ def create_cart(new_cart: Customer):
     """ """
     with db.engine.begin() as connection:
         cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_class) VALUES (:class) RETURNING cart_id"), {"class": new_cart.character_class}).scalar_one()
-        # connection.execute(sqlalchemy.insert(carts),
-        #     [
-        #         {"customer_class": new_cart.character_class}
-        #     ]
-        # )
     return {"cart_id": cart_id}
 
 
@@ -131,6 +115,10 @@ def set_item_quantity(cart_id: int, item_sku: str, cart_item: CartItem):
     with db.engine.begin() as connection:
         potion_id = connection.execute(sqlalchemy.text("SELECT id FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
         potion_inventory = connection.execute(sqlalchemy.text("SELECT quantity FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
+        try:   # try to update the catalog so that customers don't try to buy at the same time and then I don't have enough?
+            connection.execute(sqlalchemy.text("UPDATE catalog SET quantity = quantity - :q WHERE id = :id"), {"q": quantity, "id": potion_id})
+        except exc.IntegrityError as e:
+            raise Exception(f"Cannot add to cart, in inventory: {potion_inventory}, trying to buy: {quantity}")
         print(f"cart_id: {cart_id}, potion sku: {item_sku}, quantity: {quantity}")
         potion_cost = connection.execute(sqlalchemy.text("SELECT price FROM potions WHERE potion_sku = :sku"), {"sku": item_sku}).scalar_one()
         connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = total_potions_bought + :potions_bought, total_cost = total_cost + :cost WHERE cart_id = :id"), {"potions_bought": quantity, "cost": potion_cost * quantity, "id": cart_id})
