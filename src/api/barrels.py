@@ -75,6 +75,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         ml_capacity = connection.execute(sqlalchemy.text("SELECT ml_capacity FROM capacity")).scalar_one()
         ml_gold = connection.execute(sqlalchemy.text("SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
         gold, green_ml, blue_ml, red_ml, dark_ml = ml_gold
+        total_ml = green_ml + blue_ml + red_ml + dark_ml
         dark_exist = False
         ml_per_color = (ml_capacity - dark_ml) / 3
         for barrel in wholesale_catalog:
@@ -86,11 +87,11 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
         res = []
-        if dark_exist and (gold >= 1000) and dark_ml <= 0 :
+        if dark_exist and (gold >= 1000) and dark_ml <= 0 and ((ml_capacity - total_ml) >= 10000) :
             res.append(
                  {
                     "sku": "LAGE_DARK_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 700
@@ -98,7 +99,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "MEDIUM_BLUE_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 300
@@ -106,7 +107,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 2,
+                    "quantity": 2
                 }
             )
             gold_to_spend += (120 * 2)
@@ -114,7 +115,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 120 
@@ -122,7 +123,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "MEDIUM_RED_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 250
@@ -130,7 +131,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_RED_BARREL",
-                    "quantity": 2,
+                    "quantity": 2
                 }
             )
             gold_to_spend += 200
@@ -138,7 +139,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_RED_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 100
@@ -146,7 +147,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "MEDIUM_GREEN_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 250
@@ -154,7 +155,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 2,
+                    "quantity": 2
                 }
             )
             gold_to_spend += 200
@@ -162,7 +163,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             res.append(
                 {
                     "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 1,
+                    "quantity": 1
                 }
             )
             gold_to_spend += 100
