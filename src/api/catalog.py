@@ -15,14 +15,8 @@ def get_catalog():
     res = []
     with db.engine.begin() as connection:
         potion_rows = connection.execute(sqlalchemy.text("SELECT id, potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
-        connection.execute(sqlalchemy.text("TRUNCATE TABLE catalog"))
         for row in potion_rows:
             id, sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
-            connection.execute(sqlalchemy.insert(catalog),
-            [
-                {"id": id, "potion_sku": sku, "price": price, "quantity": quantity}
-            ]
-            )
             if quantity > 0:
                 res.append(
                     {
