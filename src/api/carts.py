@@ -144,7 +144,7 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
         # get total num of potions bought
         total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
-        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost WHERE cart_id = :id"), {"potions_bought": total_potions_bought, "cost": total_cost, "cart_id": cart_id})
+        connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost WHERE cart_id = :id"), {"potions_bought": total_potions_bought, "cost": total_cost, "id": cart_id})
         # get all the items in the cart
         potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
         for potion_id, quantity in potions:
