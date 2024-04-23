@@ -2,7 +2,6 @@ from fastapi import APIRouter
 import sqlalchemy
 from src import database as db
 metadata_obj = sqlalchemy.MetaData()
-catalog = sqlalchemy.Table("catalog", metadata_obj, autoload_with=db.engine)
 
 router = APIRouter()
 
