@@ -104,16 +104,16 @@ def get_bottle_plan():
         if dark_ml >= 100:
             potion_per_color = available_to_make // 6
         else:
-            potion_per_color = available_to_make // 5
+            potion_per_color = available_to_make // 4
         print("potions per color: ", potion_per_color)
         res = []
         #[r, g, b, d]
         # Make custom ones first?
         purple_to_make = 0
-        while (red_ml >= 50) and (blue_ml >= 50) and (purple_to_make < potion_per_color):
-            purple_to_make += 1
-            red_ml -= 50
-            blue_ml -= 50
+        # while (red_ml >= 50) and (blue_ml >= 50) and (purple_to_make < potion_per_color):
+        #     purple_to_make += 1
+        #     red_ml -= 50
+        #     blue_ml -= 50
         rgb_to_make = 0
         while (red_ml >= 33) and (blue_ml >= 34) and (green_ml >= 33) and (rgb_to_make < potion_per_color):
             rgb_to_make += 1
