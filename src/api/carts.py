@@ -150,5 +150,5 @@ def checkout(cart_id: int, cart_checkout: CartCheckout):
         for potion_id, quantity in potions:
             # update the potion inventory for all the items they got
             connection.execute(sqlalchemy.text(f"UPDATE potions SET quantity = quantity - :potion_num WHERE id = :id"), {"potion_num": quantity, "id": potion_id})
-
+    print(cart_checkout.payment)
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_cost}

@@ -109,7 +109,7 @@ def get_bottle_plan():
         if dark_ml >= 100:
             potion_per_color = available_to_make // 6
         else:
-            potion_per_color = available_to_make // 3
+            potion_per_color = available_to_make // 4
         print("potions per color: ", potion_per_color)
         res = []
         #[r, g, b, d]
@@ -119,12 +119,12 @@ def get_bottle_plan():
         #     purple_to_make += 1
         #     red_ml -= 50
         #     blue_ml -= 50
-        # rgb_to_make = 0
-        # while (red_ml >= 33) and (blue_ml >= 34) and (green_ml >= 33) and (rgb_to_make < potion_per_color):
-        #     rgb_to_make += 1
-        #     red_ml -= 33
-        #     blue_ml -= 34
-        #     green_ml -=33
+        rgb_to_make = 0
+        while (red_ml >= 33) and (blue_ml >= 34) and (green_ml >= 33) and (rgb_to_make < potion_per_color):
+            rgb_to_make += 1
+            red_ml -= 33
+            blue_ml -= 34
+            green_ml -=33
         potion_res = {}
         potions = connection.execute(sqlalchemy.text("SELECT potion_sku, red_ml, green_ml, blue_ml, dark_ml FROM potions"))
         for row in potions:
@@ -188,11 +188,11 @@ def get_bottle_plan():
                         "potion_type": potion_res["astral_magenta"],
                         "quantity": purple_to_make
                     })
-        # if rgb_to_make > 0:
-        #     res.append({
-        #                 "potion_type": potion_res["trix_are_for_kids"],
-        #                 "quantity": rgb_to_make
-        #             })
+        if rgb_to_make > 0:
+            res.append({
+                        "potion_type": potion_res["trix_are_for_kids"],
+                        "quantity": rgb_to_make
+                    })
     return res
 
 if __name__ == "__main__":
