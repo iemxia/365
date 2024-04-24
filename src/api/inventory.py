@@ -21,7 +21,7 @@ def get_inventory():
         potion_total = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
     return {"number_of_potions": potion_total, "ml_in_barrels": green_ml + red_ml + blue_ml + dark_ml, "gold": gold}
 
-# Gets called once a day
+# Gets called once a day around 1pm
 @router.post("/plan")
 def get_capacity_plan():
     """ 
