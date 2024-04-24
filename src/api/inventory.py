@@ -39,7 +39,7 @@ def get_capacity_plan():
         "potion_capacity": 2,
         "ml_capacity": 2
         }
-    elif gold >= 6000 and ml_cap <= 20000 and potion_cap <= 100:
+    elif gold >= 6000 and ml_cap <= 30000 and potion_cap <= 150:
         return {
         "potion_capacity": 1,
         "ml_capacity": 1
