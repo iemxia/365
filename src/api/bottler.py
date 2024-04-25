@@ -120,11 +120,11 @@ def get_bottle_plan():
         #     red_ml -= 50
         #     blue_ml -= 50
         rgb_to_make = 0
-        while (red_ml >= 33) and (blue_ml >= 34) and (green_ml >= 33) and (rgb_to_make < potion_per_color):
-            rgb_to_make += 1
-            red_ml -= 33
-            blue_ml -= 34
-            green_ml -=33
+        # while (red_ml >= 33) and (blue_ml >= 34) and (green_ml >= 33) and (rgb_to_make < potion_per_color):
+        #     rgb_to_make += 1
+        #     red_ml -= 33
+        #     blue_ml -= 34
+        #     green_ml -=33
         potion_res = {}
         potions = connection.execute(sqlalchemy.text("SELECT potion_sku, red_ml, green_ml, blue_ml, dark_ml FROM potions"))
         for row in potions:
