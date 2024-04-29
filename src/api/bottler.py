@@ -99,7 +99,69 @@ def get_bottle_plan():
             sku, potion_type, id = row
             potion_res[sku] = potion_type
             num_potions[id] = connection.execute(sqlalchemy.text("SELECT SUM(quantity_change) FROM potions_ledger_entries WHERE potion_id = :pot_id "), {"pot_id": id}).scalar_one()
-        print(num_potions)
+        if (num_potions[0] < absolute_max):
+            if green_ml >= (100 * potion_per_color):
+                res.append(
+                        {
+                            "potion_type": potion_res["mosh_pit"],
+                            "quantity": potion_per_color,
+                        })
+                green_ml -= (100 * potion_per_color)
+                available_to_make -= potion_per_color
+            elif green_ml >= 100:
+                res.append(
+                        {
+                            "potion_type": potion_res["mosh_pit"],
+                            "quantity": green_ml // 100
+                        })
+                green_ml -= (100 * (green_ml // 100)) 
+                available_to_make -= (green_ml // 100)
+        if (num_potions[2] < absolute_max):
+            if red_ml >= (100 * potion_per_color):
+                print("red appending to list")
+                res.append(
+                        {
+                            "potion_type": potion_res["thrash_red"],
+                            "quantity": potion_per_color
+                        })
+                red_ml -= (100 * potion_per_color)
+                available_to_make -= potion_per_color
+            elif red_ml >= 100:
+                res.append(
+                    {
+                        "potion_type": potion_res["thrash_red"],
+                        "quantity": red_ml // 100
+                    }
+                )
+                red_ml -= (100 * (red_ml // 100))
+                available_to_make -= (red_ml // 100)
+        if (num_potions[1] < absolute_max):
+            if blue_ml >= (100 * potion_per_color):
+                res.append(
+                        {
+                            "potion_type": potion_res["dizzy_blue"],
+                            "quantity": potion_per_color
+                        })
+                blue_ml -= (100 * potion_per_color)
+                available_to_make -= potion_per_color
+            elif blue_ml >= 100:
+                res.append(
+                    {
+                        "potion_type": potion_res["dizzy_blue"],
+                        "quantity": blue_ml // 100
+                    }
+                )
+                blue_ml -= (100 * (blue_ml // 100))
+                available_to_make -= (blue_ml // 100)
+        if (num_potions[4] < absolute_max):
+            if dark_ml >= (100 * potion_per_color):
+                res.append(
+                        {
+                            "potion_type": potion_res["fade_dark"],
+                            "quantity": potion_per_color
+                        })
+                dark_ml -= (100 * potion_per_color)
+                available_to_make -= potion_per_color
         purple_to_make = 0
         while (red_ml >= magenta[0]) and (blue_ml >= magenta[2]) and (purple_to_make < potion_per_color and (num_potions[4] < absolute_max)):
             purple_to_make += 1
@@ -111,74 +173,44 @@ def get_bottle_plan():
             red_ml -= trix[0]
             blue_ml -= trix[2]
             green_ml -= trix[1]
-        if (num_potions[0] < absolute_max):
-            if green_ml >= (100 * potion_per_color):
-                res.append(
-                        {
-                            "potion_type": potion_res["mosh_pit"],
-                            "quantity": potion_per_color,
-                        })
-                green_ml -= (100 * potion_per_color)
-            elif green_ml >= 100:
-                res.append(
-                        {
-                            "potion_type": potion_res["mosh_pit"],
-                            "quantity": green_ml // 100
-                        })
-                green_ml -= (100 * (green_ml // 100))  
-        if (num_potions[2] < absolute_max):
-            if red_ml >= (100 * potion_per_color):
-                print("red appending to list")
-                res.append(
-                        {
-                            "potion_type": potion_res["thrash_red"],
-                            "quantity": potion_per_color
-                        })
-                red_ml -= (100 * potion_per_color)
-            elif red_ml >= 100:
-                res.append(
-                    {
-                        "potion_type": potion_res["thrash_red"],
-                        "quantity": red_ml // 100
-                    }
-                )
-                red_ml -= (100 * (red_ml // 100))
-        if (num_potions[1] < absolute_max):
-            if blue_ml >= (100 * potion_per_color):
-                res.append(
-                        {
-                            "potion_type": potion_res["dizzy_blue"],
-                            "quantity": potion_per_color
-                        })
-                blue_ml -= (100 * potion_per_color)
-            elif blue_ml >= 100:
-                res.append(
-                    {
-                        "potion_type": potion_res["dizzy_blue"],
-                        "quantity": blue_ml // 100
-                    }
-                )
-                blue_ml -= (100 * (blue_ml // 100))
-        if (num_potions[4] < absolute_max):
-            if dark_ml >= (100 * potion_per_color):
-                res.append(
-                        {
-                            "potion_type": potion_res["fade_dark"],
-                            "quantity": potion_per_color
-                        })
-                dark_ml -= (100 * potion_per_color)
         if (num_potions[3] < absolute_max):
             if purple_to_make > 0:
                 res.append({
                             "potion_type": potion_res["astral_magenta"],
                             "quantity": purple_to_make
                         })
+                available_to_make -= purple_to_make
         if (num_potions[5] < absolute_max):
             if rgb_to_make > 0:
                 res.append({
                             "potion_type": potion_res["trix_are_for_kids"],
                             "quantity": rgb_to_make
                         })
+                available_to_make -= purple_to_make
+        sums = {
+            (0, 100, 0, 0): green_ml,
+            (0, 0, 100, 0): blue_ml,
+            (100, 0, 0, 0): red_ml,
+            (0, 0, 0, 100): dark_ml
+            }
+        print("Available to make: ", available_to_make)
+        max_ml = max(sums.values())
+        max_color = [key for key, value in sums.items() if value == max_ml][0]
+        print(f"Max color {max_color} {max_ml} mL")
+        # use the remaining potions I can make, and make them from the color I have the most ml of
+        if (max_ml >= (100 * available_to_make)):
+             # only make the remainder I can, don't go over
+             res.append({
+                            "potion_type": list(max_color),
+                            "quantity": available_to_make
+                        })
+             # if not enough, just make what I can
+        elif (max_ml >= 100):
+             res.append({
+                            "potion_type": list(max_color),
+                            "quantity": max_ml // 100
+                        })
+            
     return res
 
 if __name__ == "__main__":
