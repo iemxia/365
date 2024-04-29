@@ -93,11 +93,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         total_ml = green_ml + blue_ml + red_ml + dark_ml
         print("Total ml: ", total_ml)
         dark_exist = False
-        ml_per_color = (ml_capacity - dark_ml) / 3
-        for barrel in wholesale_catalog:
-            if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
-                ml_per_color = (ml_capacity - 10000) / 4
-                dark_exist = True
+        # ml_per_color = (ml_capacity - dark_ml) / 3
+        ml_per_color = 500
+        # Uncomment below once rich:
+        # for barrel in wholesale_catalog:
+        #     if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
+        #         ml_per_color = (ml_capacity - 10000) / 4
+        #         dark_exist = True
         print("ml per color:", ml_per_color)
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
