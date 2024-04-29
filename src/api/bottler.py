@@ -36,14 +36,6 @@ def post_deliver_bottles(potions_delivered: list[PotionInventory], order_id: int
     #[r, g, b, d]
     total_ml_subtract = [0, 0, 0, 0]
     with db.engine.begin() as connection:
-        # for potion in potions_delivered:
-        #     ml_values = [0, 0, 0, 0]
-        #     for i, potion_type in enumerate(potion.potion_type):
-        #         if potion_type > 0:
-        #             ml_values[i] = potion_type
-        #             total_ml_subtract[i] += ml_values[i] * potion.quantity
-        #             connection.execute(sqlalchemy.text("UPDATE potions SET quantity = quantity + :num WHERE (green_ml = :green AND red_ml = :red AND blue_ml = :blue AND dark_ml = :dark )"), {"num": potion.quantity, "green": ml_values[1], "red": ml_values[0], "blue": ml_values[2], "dark": ml_values[3]})
-        # connection.execute(sqlalchemy.text("UPDATE global_inventory SET num_red_ml = num_red_ml - :red, num_green_ml = num_green_ml - :green, num_blue_ml = num_blue_ml - :blue, num_dark_ml = num_dark_ml - :dark"), {"green": total_ml_subtract[1], "red": total_ml_subtract[0], "blue": total_ml_subtract[2], "dark": total_ml_subtract[3]})
         tx_id = connection.execute(sqlalchemy.text("INSERT INTO overall_transactions (description, type) VALUES ('Delivering potions, order id :idd ', 'bottler deliver') RETURNING id"), {"idd": order_id}).scalar_one()
         for potion in potions_delivered:
             for i in range(4):
