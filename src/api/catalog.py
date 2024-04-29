@@ -13,10 +13,11 @@ def get_catalog():
     """
     res = []
     with db.engine.begin() as connection:
-        potion_rows = connection.execute(sqlalchemy.text("SELECT id, potion_sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity FROM potions"))
+        potion_rows = connection.execute(sqlalchemy.text("SELECT id, potion_sku, potion_type, price FROM potions"))
         for row in potion_rows:
-            id, sku, green_ml, red_ml, blue_ml, dark_ml, price, quantity = row
-            if quantity > 0:
+            id, sku, potion_type, price = row
+            quantity = connection.execute(sqlalchemy.text("SELECT SUM(quantity_change) FROM potions_ledger_entries WHERE potion_id = :pot_id"), {"pot_id": id}).scalar_one()
+            if quantity != None and quantity > 0:
                 res.append(
                     {
                             "sku": sku,
@@ -24,7 +25,7 @@ def get_catalog():
                             "quantity": quantity,
                             "price": price,
                             #[r, g, b, d]
-                            "potion_type": [green_ml, red_ml, blue_ml, dark_ml],
+                            "potion_type": potion_type
                         }
                 )
         return res

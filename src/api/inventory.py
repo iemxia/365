@@ -6,6 +6,11 @@ import sqlalchemy
 from sqlalchemy import exc
 from src import database as db
 
+metadata_obj = sqlalchemy.MetaData()
+transactions = sqlalchemy.Table("overall_transactions", metadata_obj, autoload_with=db.engine)
+ml_ledger = sqlalchemy.Table("ml_ledger_entries", metadata_obj, autoload_with=db.engine)
+gold_ledger = sqlalchemy.Table("gold_ledger_entries", metadata_obj, autoload_with=db.engine)
+
 router = APIRouter(
     prefix="/inventory",
     tags=["inventory"],
@@ -16,10 +21,15 @@ router = APIRouter(
 def get_inventory():
     """ """
     with db.engine.begin() as connection:
-        ml_gold_results = connection.execute(sqlalchemy.text('SELECT gold, num_green_ml, num_red_ml, num_blue_ml, num_dark_ml FROM global_inventory')).fetchone()
-        gold, green_ml, red_ml, blue_ml, dark_ml = ml_gold_results
-        potion_total = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
-    return {"number_of_potions": potion_total, "ml_in_barrels": green_ml + red_ml + blue_ml + dark_ml, "gold": gold}
+        # ml_gold_results = connection.execute(sqlalchemy.text('SELECT gold, num_green_ml, num_red_ml, num_blue_ml, num_dark_ml FROM global_inventory')).fetchone()
+        # gold, green_ml, red_ml, blue_ml, dark_ml = ml_gold_results
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold_change) FROM gold_ledger_entries")).scalar()
+        ml = connection.execute(sqlalchemy.text("SELECT SUM(green_change), SUM(blue_change), SUM(red_change), SUM(dark_change) FROM ml_ledger_entries")).fetchone()
+        green_ml, blue_ml, red_ml, dark_ml = ml
+        total_ml = green_ml + blue_ml + red_ml + dark_ml
+        #potion_total = connection.execute(sqlalchemy.text("SELECT SUM(quantity) AS total_potions FROM potions")).scalar()
+        potion_total = connection.execute(sqlalchemy.text("SELECT SUM(quantity_change) FROM potions_ledger_entries")).scalar()
+    return {"number_of_potions": potion_total, "ml_in_barrels": total_ml, "gold": gold}
 
 # Gets called once a day around 1pm
 @router.post("/plan")
@@ -31,7 +41,8 @@ def get_capacity_plan():
     ml_cap = 0
     potion_cap = 0
     with db.engine.begin() as connection:
-        gold = connection.execute(sqlalchemy.text('SELECT gold FROM global_inventory')).scalar_one()
+        # gold = connection.execute(sqlalchemy.text('SELECT gold FROM global_inventory')).scalar_one()
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold_change) FROM gold_ledger_entries")).scalar()
         capacity_results = connection.execute(sqlalchemy.text('SELECT ml_capacity, potion_capacity FROM capacity')).fetchone()
         ml_cap, potion_cap = capacity_results
     if gold >= 12000 and ml_cap <= 10000 and potion_cap <= 50:
@@ -39,7 +50,7 @@ def get_capacity_plan():
         "potion_capacity": 2,
         "ml_capacity": 2
         }
-    elif gold >= 6000 and ml_cap <= 40000 and potion_cap <= 200:
+    elif gold >= 6000:
         return {
         "potion_capacity": 1,
         "ml_capacity": 1
@@ -72,7 +83,11 @@ def deliver_capacity_plan(capacity_purchase : CapacityPurchase, order_id: int):
     ml_unit = capacity_purchase.ml_capacity 
     total_gold_spent = 1000 * (potion_unit + ml_unit)
     with db.engine.begin() as connection:
+        tx_id = connection.execute(sqlalchemy.text("INSERT INTO overall_transactions (description, type) VALUES ('Delivering capacity, order id :idd :potion potion units, :ml ml units', 'capacity deliver') RETURNING id"), {"idd": order_id, "potion": potion_unit, "ml": ml_unit}).scalar_one()
         connection.execute(sqlalchemy.text(f'UPDATE capacity SET potion_capacity = potion_capacity + :pot_cap'), {"pot_cap": capacity_purchase.potion_capacity * 50})
         connection.execute(sqlalchemy.text(f'UPDATE capacity SET ml_capacity = ml_capacity + :ml'), {"ml": capacity_purchase.ml_capacity * 10000})
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - :gold_spent'), {"gold_spent": total_gold_spent})
+        connection.execute(sqlalchemy.insert(gold_ledger), 
+                           [
+                               {"transaction_id": tx_id, "gold_change": total_gold_spent * -1}
+                           ])
     return "OK"

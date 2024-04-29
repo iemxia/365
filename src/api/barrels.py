@@ -9,6 +9,9 @@ metadata_obj = sqlalchemy.MetaData()
 capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
 global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
+transactions = sqlalchemy.Table("overall_transactions", metadata_obj, autoload_with=db.engine)
+ml_ledger = sqlalchemy.Table("ml_ledger_entries", metadata_obj, autoload_with=db.engine)
+gold_ledger = sqlalchemy.Table("gold_ledger_entries", metadata_obj, autoload_with=db.engine)
 router = APIRouter(
     prefix="/barrels",
     tags=["barrels"],
@@ -50,13 +53,23 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
         else:
             raise Exception("Invalid barrel potion type")
     with db.engine.begin() as connection:
-        # update mL of green
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + :total_green_ml'), [{"total_green_ml": total_green_ml}])
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_red_ml = num_red_ml + :total_red_ml'), [{"total_red_ml": total_red_ml}])
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_blue_ml = num_blue_ml + :total_blue_ml'), [{"total_blue_ml": total_blue_ml}])
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_dark_ml = num_dark_ml + :total_dark_ml'), [{"total_dark_ml": total_dark_ml}])
-        # update gold left
-        connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - :total_price'), [{"total_price": total_price}])
+        tx_id = connection.execute(sqlalchemy.text("INSERT INTO overall_transactions (description, type) VALUES ('Delivering barrels, order id :idd :red :green :blue :dark ', 'barrels deliver') RETURNING id"), {"idd": order_id, "red": total_red_ml, "green": total_green_ml, "blue": total_blue_ml, "dark": total_dark_ml}).scalar_one()
+        # updating mL in ml ledger entries
+        connection.execute(sqlalchemy.insert(ml_ledger), 
+                           [
+                               {"transaction_id": tx_id, "green_change": total_green_ml, "blue_change": total_blue_ml, "red_change": total_red_ml, "dark_change": total_dark_ml}
+                           ])
+        # updating gold in gold ledger entries
+        connection.execute(sqlalchemy.insert(gold_ledger), 
+                           [
+                               {"transaction_id": tx_id, "gold_change": total_price * -1}
+                           ])
+        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + :total_green_ml'), [{"total_green_ml": total_green_ml}])
+        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_red_ml = num_red_ml + :total_red_ml'), [{"total_red_ml": total_red_ml}])
+        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_blue_ml = num_blue_ml + :total_blue_ml'), [{"total_blue_ml": total_blue_ml}])
+        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_dark_ml = num_dark_ml + :total_dark_ml'), [{"total_dark_ml": total_dark_ml}])
+        # # update gold left
+        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - :total_price'), [{"total_price": total_price}])
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
     return "OK"
 
@@ -73,15 +86,17 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
     with db.engine.begin() as connection:
         # get the number of potions
         ml_capacity = connection.execute(sqlalchemy.text("SELECT ml_capacity FROM capacity")).scalar_one()
-        ml_gold = connection.execute(sqlalchemy.text("SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
-        gold, green_ml, blue_ml, red_ml, dark_ml = ml_gold
+        gold = connection.execute(sqlalchemy.text("SELECT SUM(gold_change) FROM gold_ledger_entries")).scalar()
+        # ml_gold = connection.execute(sqlalchemy.text("SELECT gold, num_green_ml, num_blue_ml, num_red_ml, num_dark_ml FROM global_inventory")).fetchone()
+        ml = connection.execute(sqlalchemy.text("SELECT SUM(green_change), SUM(blue_change), SUM(red_change), SUM(dark_change) FROM ml_ledger_entries")).fetchone()
+        green_ml, blue_ml, red_ml, dark_ml = ml
         total_ml = green_ml + blue_ml + red_ml + dark_ml
+        print("Total ml: ", total_ml)
         dark_exist = False
         ml_per_color = (ml_capacity - dark_ml) / 3
         for barrel in wholesale_catalog:
             if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
                 ml_per_color = (ml_capacity - 10000) / 4
-                print("ml per color:", ml_per_color)
                 dark_exist = True
         print("ml per color:", ml_per_color)
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")

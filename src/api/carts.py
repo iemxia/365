@@ -11,6 +11,10 @@ global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_w
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
 cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)
+transactions = sqlalchemy.Table("overall_transactions", metadata_obj, autoload_with=db.engine)
+ml_ledger = sqlalchemy.Table("ml_ledger_entries", metadata_obj, autoload_with=db.engine)
+gold_ledger = sqlalchemy.Table("gold_ledger_entries", metadata_obj, autoload_with=db.engine)
+potion_ledger = sqlalchemy.Table("potions_ledger_entries", metadata_obj, autoload_with=db.engine)
 
 router = APIRouter(
     prefix="/carts",
@@ -139,16 +143,22 @@ class CartCheckout(BaseModel):
 def checkout(cart_id: int, cart_checkout: CartCheckout):
     """ """
     with db.engine.begin() as connection:
-        # update gold
-        total_cost = connection.execute(sqlalchemy.text("SELECT SUM(gold_cost) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
-        connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
-        # get total num of potions bought
         total_potions_bought = connection.execute(sqlalchemy.text("SELECT SUM(quantity) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
+        total_cost = connection.execute(sqlalchemy.text("SELECT SUM(gold_cost) FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).scalar_one()
         connection.execute(sqlalchemy.text("UPDATE carts SET total_potions_bought = :potions_bought, total_cost = :cost WHERE cart_id = :id"), {"potions_bought": total_potions_bought, "cost": total_cost, "id": cart_id})
+        tx_id = connection.execute(sqlalchemy.text("INSERT INTO overall_transactions (description, type) VALUES ('Cart checkout id :idd cost :cost bought :num potions', 'cart checkout') RETURNING id"), {"idd": cart_id, "cost": total_cost, "num": total_potions_bought}).scalar_one()
+        connection.execute(sqlalchemy.insert(gold_ledger), 
+                           [
+                               {"transaction_id": tx_id, "gold_change": total_cost}
+                           ])
+        # connection.execute(sqlalchemy.text(f"UPDATE global_inventory SET gold = gold + :total"), {"total": total_cost})
         # get all the items in the cart
         potions = connection.execute(sqlalchemy.text("SELECT potion_id, quantity FROM cart_items WHERE cart_id = :id"), {"id": cart_id}).fetchall()
         for potion_id, quantity in potions:
             # update the potion inventory for all the items they got
-            connection.execute(sqlalchemy.text(f"UPDATE potions SET quantity = quantity - :potion_num WHERE id = :id"), {"potion_num": quantity, "id": potion_id})
-    print(cart_checkout.payment)
+            # connection.execute(sqlalchemy.text(f"UPDATE potions SET quantity = quantity - :potion_num WHERE id = :id"), {"potion_num": quantity, "id": potion_id})
+            connection.execute(sqlalchemy.insert(potion_ledger), 
+                           [
+                               {"transaction_id": tx_id, "potion_id": potion_id, "quantity_change": quantity * -1}
+                           ])
     return {"total_potions_bought": total_potions_bought, "total_gold_paid": total_cost}

@@ -25,5 +25,14 @@
     ],
     "price": 100,
     "quantity": 1
+  },
+{
+    "sku": "dark",
+    "ml_per_barrel": 150,
+    "potion_type": [
+      0, 0, 0, 1
+    ],
+    "price": 160,
+    "quantity": 1
   }
 ]

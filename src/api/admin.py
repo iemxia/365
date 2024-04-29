@@ -21,6 +21,7 @@ def reset():
         connection.execute(sqlalchemy.text('UPDATE global_inventory SET num_green_ml, num_red_ml, num_blue_ml, num_dark_ml = 0'))
         connection.execute(sqlalchemy.text("UPDATE potions SET quantity = 0"))
         connection.execute(sqlalchemy.text("TRUNCATE TABLE carts"))
+        connection.execute(sqlalchemy.text("TRUNCATE TABLE overall_transactions"))
         connection.execute(sqlalchemy.text("TRUNCATE TABLE cart_items"))
     return "OK"
 
