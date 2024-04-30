@@ -8,7 +8,6 @@ from src import database as db
 
 metadata_obj = sqlalchemy.MetaData()
 capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
-global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 transactions = sqlalchemy.Table("overall_transactions", metadata_obj, autoload_with=db.engine)
 ml_ledger = sqlalchemy.Table("ml_ledger_entries", metadata_obj, autoload_with=db.engine)
@@ -99,6 +98,7 @@ def get_bottle_plan():
             sku, potion_type, id = row
             potion_res[sku] = potion_type
             num_potions[id] = connection.execute(sqlalchemy.text("SELECT SUM(quantity_change) FROM potions_ledger_entries WHERE potion_id = :pot_id "), {"pot_id": id}).scalar_one()
+        print(num_potions)
         if (num_potions[0] < absolute_max):
             if green_ml >= 100:
                 to_make = min(potion_per_color, green_ml // 100)
@@ -143,6 +143,7 @@ def get_bottle_plan():
         # while (red_ml >= magenta[0]) and (blue_ml >= magenta[2]) and (purple_to_make < potion_per_color and (num_potions[4] < absolute_max)):
         #     purple_to_make += 1
         #     red_ml -= magenta[0]
+        #     print(magenta[0])
         #     blue_ml -= magenta[2]
         # rgb_to_make = 0
         # while (red_ml >= trix[0]) and (blue_ml >= trix[2]) and (green_ml >= trix[1]) and (rgb_to_make < potion_per_color) and (num_potions[5] < absolute_max):

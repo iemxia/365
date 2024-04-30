@@ -7,7 +7,6 @@ import sqlalchemy
 from src import database as db
 metadata_obj = sqlalchemy.MetaData()
 capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
-global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 carts = sqlalchemy.Table("carts", metadata_obj, autoload_with=db.engine)
 cart_items = sqlalchemy.Table("cart_items", metadata_obj, autoload_with=db.engine)

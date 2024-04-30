@@ -7,7 +7,6 @@ from src import database as db
 
 metadata_obj = sqlalchemy.MetaData()
 capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
-global_inventory = sqlalchemy.Table("global_inventory", metadata_obj, autoload_with=db.engine)
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
 transactions = sqlalchemy.Table("overall_transactions", metadata_obj, autoload_with=db.engine)
 ml_ledger = sqlalchemy.Table("ml_ledger_entries", metadata_obj, autoload_with=db.engine)
