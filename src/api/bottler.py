@@ -139,31 +139,31 @@ def get_bottle_plan():
                         })
                 dark_ml -= (100 * to_make)
                 available_to_make -= to_make
-        purple_to_make = 0
-        while (red_ml >= magenta[0]) and (blue_ml >= magenta[2]) and (purple_to_make < potion_per_color and (num_potions[4] < absolute_max)):
-            purple_to_make += 1
-            red_ml -= magenta[0]
-            blue_ml -= magenta[2]
-        rgb_to_make = 0
-        while (red_ml >= trix[0]) and (blue_ml >= trix[2]) and (green_ml >= trix[1]) and (rgb_to_make < potion_per_color) and (num_potions[5] < absolute_max):
-            rgb_to_make += 1
-            red_ml -= trix[0]
-            blue_ml -= trix[2]
-            green_ml -= trix[1]
-        if (num_potions[3] < absolute_max):
-            if purple_to_make > 0:
-                res.append({
-                            "potion_type": potion_res["astral_magenta"],
-                            "quantity": purple_to_make
-                        })
-                available_to_make -= purple_to_make
-        if (num_potions[5] < absolute_max):
-            if rgb_to_make > 0:
-                res.append({
-                            "potion_type": potion_res["trix_are_for_kids"],
-                            "quantity": rgb_to_make
-                        })
-                available_to_make -= purple_to_make
+        # purple_to_make = 0
+        # while (red_ml >= magenta[0]) and (blue_ml >= magenta[2]) and (purple_to_make < potion_per_color and (num_potions[4] < absolute_max)):
+        #     purple_to_make += 1
+        #     red_ml -= magenta[0]
+        #     blue_ml -= magenta[2]
+        # rgb_to_make = 0
+        # while (red_ml >= trix[0]) and (blue_ml >= trix[2]) and (green_ml >= trix[1]) and (rgb_to_make < potion_per_color) and (num_potions[5] < absolute_max):
+        #     rgb_to_make += 1
+        #     red_ml -= trix[0]
+        #     blue_ml -= trix[2]
+        #     green_ml -= trix[1]
+        # if (num_potions[3] < absolute_max):
+        #     if purple_to_make > 0:
+        #         res.append({
+        #                     "potion_type": potion_res["astral_magenta"],
+        #                     "quantity": purple_to_make
+        #                 })
+        #         available_to_make -= purple_to_make
+        # if (num_potions[5] < absolute_max):
+        #     if rgb_to_make > 0:
+        #         res.append({
+        #                     "potion_type": potion_res["trix_are_for_kids"],
+        #                     "quantity": rgb_to_make
+        #                 })
+        #         available_to_make -= purple_to_make
         sums = {
             (0, 100, 0, 0): green_ml,
             (0, 0, 100, 0): blue_ml,
