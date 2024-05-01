@@ -111,54 +111,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 700
-        if ((gold - gold_to_spend) >= 300) and blue_ml <= (ml_per_color - 2500):
-            res.append(
-                {
-                    "sku": "MEDIUM_BLUE_BARREL",
-                    "quantity": 1
-                }
-            )
-            gold_to_spend += 300
-        elif ((gold - gold_to_spend) >= 240) and (blue_ml <= (ml_per_color - 1000)):
-            res.append(
-                {
-                    "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 2
-                }
-            )
-            gold_to_spend += (120 * 2)
-        elif ((gold - gold_to_spend) >= 120) and (blue_ml <= (ml_per_color - 500)):
-            res.append(
-                {
-                    "sku": "SMALL_BLUE_BARREL",
-                    "quantity": 1
-                }
-            )
-            gold_to_spend += 120 
-        if ((gold - gold_to_spend) - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
-            res.append(
-                {
-                    "sku": "MEDIUM_RED_BARREL",
-                    "quantity": 1
-                }
-            )
-            gold_to_spend += 250
-        elif (gold - gold_to_spend) >= 200 and (red_ml <= (ml_per_color - 1000)):
-            res.append(
-                {
-                    "sku": "SMALL_RED_BARREL",
-                    "quantity": 2
-                }
-            )
-            gold_to_spend += 200
-        elif (gold - gold_to_spend) >= 100 and (red_ml <= (ml_per_color - 500)):
-            res.append(
-                {
-                    "sku": "SMALL_RED_BARREL",
-                    "quantity": 1
-                }
-            )
-            gold_to_spend += 100
         if (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
             res.append(
                 {
@@ -167,22 +119,70 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 250
-        elif (gold - gold_to_spend) >= 200 and (green_ml <= (ml_per_color - 1000)):
+        # elif (gold - gold_to_spend) >= 200 and (green_ml <= (ml_per_color - 1000)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_GREEN_BARREL",
+        #             "quantity": 2
+        #         }
+        #     )
+        #     gold_to_spend += 200
+        # elif (gold - gold_to_spend) >= 100 and (green_ml <= (ml_per_color - 500)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_GREEN_BARREL",
+        #             "quantity": 1
+        #         }
+        #     )
+            # gold_to_spend += 100
+        if ((gold - gold_to_spend) >= 300) and blue_ml <= (ml_per_color - 2500):
             res.append(
                 {
-                    "sku": "SMALL_GREEN_BARREL",
-                    "quantity": 2
-                }
-            )
-            gold_to_spend += 200
-        elif (gold - gold_to_spend) >= 100 and (green_ml <= (ml_per_color - 500)):
-            res.append(
-                {
-                    "sku": "SMALL_GREEN_BARREL",
+                    "sku": "MEDIUM_BLUE_BARREL",
                     "quantity": 1
                 }
             )
-            gold_to_spend += 100
+            gold_to_spend += 300
+        # elif ((gold - gold_to_spend) >= 240) and (blue_ml <= (ml_per_color - 1000)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_BLUE_BARREL",
+        #             "quantity": 2
+        #         }
+        #     )
+        #     gold_to_spend += (120 * 2)
+        # elif ((gold - gold_to_spend) >= 120) and (blue_ml <= (ml_per_color - 500)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_BLUE_BARREL",
+        #             "quantity": 1
+        #         }
+        #     )
+            # gold_to_spend += 120 
+        if ((gold - gold_to_spend) - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
+            res.append(
+                {
+                    "sku": "MEDIUM_RED_BARREL",
+                    "quantity": 1
+                }
+            )
+            gold_to_spend += 250
+        # elif (gold - gold_to_spend) >= 200 and (red_ml <= (ml_per_color - 1000)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_RED_BARREL",
+        #             "quantity": 2
+        #         }
+        #     )
+        #     gold_to_spend += 200
+        # elif (gold - gold_to_spend) >= 100 and (red_ml <= (ml_per_color - 500)):
+        #     res.append(
+        #         {
+        #             "sku": "SMALL_RED_BARREL",
+        #             "quantity": 1
+        #         }
+        #     )
+            # gold_to_spend += 100
         print("gold spent:", gold_to_spend)
         return res
 
