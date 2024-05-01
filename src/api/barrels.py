@@ -92,8 +92,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         total_ml = green_ml + blue_ml + red_ml + dark_ml
         print("Total ml: ", total_ml)
         dark_exist = False
-        # ml_per_color = (ml_capacity - dark_ml) / 3
-        ml_per_color = 500
+        ml_per_color = (ml_capacity - dark_ml) / 3
         # Uncomment below once rich:
         # for barrel in wholesale_catalog:
         #     if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
@@ -111,7 +110,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 700
-        if (gold - gold_to_spend) >= 250 and (green_ml <= 2500):
+        if (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_GREEN_BARREL",
@@ -119,14 +118,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 250
-        # if (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
-        #     res.append(
-        #         {
-        #             "sku": "MEDIUM_GREEN_BARREL",
-        #             "quantity": 1
-        #         }
-        #     )
-        #     gold_to_spend += 250
         # elif (gold - gold_to_spend) >= 200 and (green_ml <= (ml_per_color - 1000)):
         #     res.append(
         #         {
@@ -143,7 +134,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #         }
         #     )
             # gold_to_spend += 100
-        if ((gold - gold_to_spend) >= 300) and blue_ml <= 2500:
+        if ((gold - gold_to_spend) >= 300) and (blue_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_BLUE_BARREL",
@@ -167,7 +158,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #         }
         #     )
             # gold_to_spend += 120 
-        if ((gold - gold_to_spend) - gold_to_spend) >= 250 and (red_ml <= 2500):
+        if ((gold - gold_to_spend) - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_RED_BARREL",
