@@ -55,6 +55,11 @@ def get_capacity_plan():
         "potion_capacity": 1,
         "ml_capacity": 1
         }
+    elif gold >= 1500:
+        return {
+        "potion_capacity": 1,
+        "ml_capacity": 0
+        }
     else:
         return {
             "potion_capacity": 0,
