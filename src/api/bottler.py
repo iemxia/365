@@ -166,16 +166,16 @@ def get_bottle_plan():
                             "quantity": rgb_to_make
                         })
                 available_to_make -= rgb_to_make
-        sums = {
-            (0, 100, 0, 0): green_ml,
-            (0, 0, 100, 0): blue_ml,
-            (100, 0, 0, 0): red_ml,
-            (0, 0, 0, 100): dark_ml
-            }
+        # sums = {
+        #     (0, 100, 0, 0): green_ml,
+        #     (0, 0, 100, 0): blue_ml,
+        #     (100, 0, 0, 0): red_ml,
+        #     (0, 0, 0, 100): dark_ml
+        #     }
         print("Available to make: ", available_to_make)
         # use the remaining potions I can make, and make them from the color I have the most ml of and go to next largest mL colors if first one doesn't have enough
-        sorted_sums = sorted(sums.items(), key=lambda x: x[1], reverse=True)
-        print("sorted mL", sorted_sums)
+        # sorted_sums = sorted(sums.items(), key=lambda x: x[1], reverse=True)
+        # print("sorted mL", sorted_sums)
         # for color, ml_value in sorted_sums:
         #     while available_to_make > 0 and ml_value >= 100:
         #         res.append({
