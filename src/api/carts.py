@@ -98,7 +98,7 @@ def search_orders(
             query = query.order_by(order_by.desc())
         
         if search_page:
-            query = query.offset(int(search_page))
+            query = query.offset(int(search_page) * 5)
 
         results_db = connection.execute(query.limit(5))
         results = []
@@ -116,8 +116,10 @@ def search_orders(
             )
             line_item_id += 1
         if search_page:
-            prev = str(int(search_page) - 5) if search_page else ""
-            next_page = str(int(search_page) + 5) if len(results) == 5 else ""
+            prev = str(int(search_page) - 1) if int(search_page) > 0 else ""
+            next_page = str(int(search_page) + 1) if len(results) == 5 else ""
+            if len(results) < 5:
+                next_page = ""
         response = {
             "previous": prev,
             "next": next_page,
