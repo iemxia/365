@@ -103,7 +103,7 @@ def post_visits(visit_id: int, customers: list[Customer]):
 def create_cart(new_cart: Customer):
     """ """
     with db.engine.begin() as connection:
-        cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_class) VALUES (:class) RETURNING cart_id"), {"class": new_cart.character_class}).scalar_one()
+        cart_id = connection.execute(sqlalchemy.text("INSERT INTO carts (customer_class, customer_name) VALUES (:class, :name) RETURNING cart_id"), {"class": new_cart.character_class, "name": new_cart.customer_name}).scalar_one()
     return {"cart_id": cart_id}
 
 
