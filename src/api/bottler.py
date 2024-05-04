@@ -78,6 +78,7 @@ def get_bottle_plan():
             total_potions = 0
         print("total potions owned: ", total_potions)
         available_to_make = potion_capacity - total_potions
+        print("start available to make", available_to_make)
         if dark_ml >= 100:
             potion_per_color = available_to_make // 6
             absolute_max = potion_capacity // 6
@@ -85,18 +86,19 @@ def get_bottle_plan():
             potion_per_color = available_to_make // 5
             absolute_max = potion_capacity // 5
         print("potions per color: ", potion_per_color)
+        print("max per color:", absolute_max)
         res = []
         #[r, g, b, d]
         # Make custom ones first?
         potion_res = {}
         num_potions = {}
         # potions = connection.execute(sqlalchemy.text("SELECT potion_sku, red_ml, green_ml, blue_ml, dark_ml FROM potions"))
-        potions = connection.execute(sqlalchemy.text("SELECT potion_sku, potion_type, id FROM potions"))
+        potions = connection.execute(sqlalchemy.text("SELECT potion_type, id FROM potions"))
         magenta = connection.execute(sqlalchemy.text("SELECT potion_type FROM potions WHERE potion_sku = 'astral_magenta' ")).scalar_one()
         trix = connection.execute(sqlalchemy.text("SELECT potion_type FROM potions WHERE potion_sku = 'trix_are_for_kids' ")).scalar_one()
         for row in potions:
-            sku, potion_type, id = row
-            potion_res[sku] = potion_type
+            potion_type, id = row
+            potion_res[id] = potion_type
             num_potions[id] = connection.execute(sqlalchemy.text("SELECT SUM(quantity_change) FROM potions_ledger_entries WHERE potion_id = :pot_id "), {"pot_id": id}).scalar_one()
         print(num_potions)
         if (num_potions[0] < absolute_max):
@@ -104,7 +106,7 @@ def get_bottle_plan():
                 to_make = min(potion_per_color, green_ml // 100)
                 res.append(
                         {
-                            "potion_type": potion_res["mosh_pit"],
+                            "potion_type": potion_res[0],
                             "quantity": to_make
                         })
                 green_ml -= (to_make * 100)
@@ -114,7 +116,7 @@ def get_bottle_plan():
                 to_make = min(potion_per_color, red_ml // 100)
                 res.append(
                         {
-                            "potion_type": potion_res["thrash_red"],
+                            "potion_type": potion_res[2],
                             "quantity": to_make
                         })
                 red_ml -= (100 * to_make)
@@ -124,7 +126,7 @@ def get_bottle_plan():
                 to_make = min(potion_per_color, blue_ml // 100)
                 res.append(
                         {
-                            "potion_type": potion_res["dizzy_blue"],
+                            "potion_type": potion_res[1],
                             "quantity": to_make
                         })
                 blue_ml -= (100 * to_make)
@@ -134,7 +136,7 @@ def get_bottle_plan():
                 to_make = min(potion_per_color, dark_ml // 100)
                 res.append(
                         {
-                            "potion_type": potion_res["fade_dark"],
+                            "potion_type": potion_res[4],
                             "quantity": to_make
                         })
                 dark_ml -= (100 * to_make)
@@ -153,17 +155,17 @@ def get_bottle_plan():
         if (num_potions[3] < absolute_max):
             if purple_to_make > 0:
                 res.append({
-                            "potion_type": potion_res["astral_magenta"],
+                            "potion_type": potion_res[3],
                             "quantity": purple_to_make
                         })
                 available_to_make -= purple_to_make
         if (num_potions[5] < absolute_max):
             if rgb_to_make > 0:
                 res.append({
-                            "potion_type": potion_res["trix_are_for_kids"],
+                            "potion_type": potion_res[5],
                             "quantity": rgb_to_make
                         })
-                available_to_make -= purple_to_make
+                available_to_make -= rgb_to_make
         sums = {
             (0, 100, 0, 0): green_ml,
             (0, 0, 100, 0): blue_ml,
@@ -174,14 +176,37 @@ def get_bottle_plan():
         # use the remaining potions I can make, and make them from the color I have the most ml of and go to next largest mL colors if first one doesn't have enough
         sorted_sums = sorted(sums.items(), key=lambda x: x[1], reverse=True)
         print("sorted mL", sorted_sums)
-        for color, ml_value in sorted_sums:
-            while available_to_make > 0 and ml_value >= 100:
+        # for color, ml_value in sorted_sums:
+        #     while available_to_make > 0 and ml_value >= 100:
+        #         res.append({
+        #             "potion_type": list(color),
+        #             "quantity": min(available_to_make, ml_value // 100)
+        #         })
+        #         available_to_make -= min(available_to_make, ml_value // 100)
+        #         ml_value -= min(available_to_make, ml_value // 100) * 100  
+        potion_counts = {}
+        for potion_id, count in num_potions.items():
+            potion_type = tuple(potion_res[potion_id])
+            potion_counts[potion_type] = count
+        print("Potion counts dictionary", potion_counts)
+        sorted_potions = sorted(potion_counts.keys(), key=lambda x: potion_counts[x])
+        print("sorted potions", sorted_potions)
+        for potion_type in sorted_potions:
+            potion_id = next(key for key, value in potion_res.items() if value == list(potion_type))
+            red_ml_needed, green_ml_needed, blue_ml_needed, dark_ml_needed = potion_type
+            if (red_ml >= red_ml_needed) and (green_ml >= green_ml_needed) and (blue_ml >= blue_ml_needed) and (dark_ml >= dark_ml_needed):
+                potions_to_make = min(available_to_make, potion_per_color, absolute_max - num_potions[potion_id])
                 res.append({
-                    "potion_type": list(color),
-                    "quantity": min(available_to_make, ml_value // 100)
+                    "potion_type": potion_type,
+                    "quantity": potions_to_make
                 })
-                available_to_make -= min(available_to_make, ml_value // 100)
-                ml_value -= min(available_to_make, ml_value // 100) * 100  
+                available_to_make -= to_make
+                red_ml -= red_ml_needed * potions_to_make
+                green_ml -= green_ml_needed * potions_to_make
+                blue_ml -= blue_ml_needed * potions_to_make
+                dark_ml -= dark_ml_needed * potions_to_make
+                if available_to_make <= 0:
+                        break
     return res
 
 if __name__ == "__main__":
