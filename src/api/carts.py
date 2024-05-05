@@ -5,6 +5,7 @@ from enum import Enum
 from sqlalchemy import exc
 import sqlalchemy
 from src import database as db
+import uuid
 metadata_obj = sqlalchemy.MetaData()
 capacity = sqlalchemy.Table("capacity", metadata_obj, autoload_with=db.engine)
 potions_inventory = sqlalchemy.Table("potions", metadata_obj, autoload_with=db.engine)
@@ -66,7 +67,6 @@ def search_orders(
     Your results must be paginated, the max results you can return at any
     time is 5 total line items.
     """
-    line_item_id = 0
     query = (
             sqlalchemy.select(
                 carts.c.customer_name,
@@ -104,17 +104,17 @@ def search_orders(
         results = []
         prev = ""
         next_page = ""
+        
         for row in results_db:
             results.append(
                 {
-                    "line_item_id": line_item_id,
+                    "line_item_id": uuid.uuid1(),
                     "item_sku": str(row.total_potions_bought) + " " + str(row.potion_sku,),
                     "customer_name": row.customer_name,
                     "line_item_total": row.total_cost,
                     "timestamp": row.timestamp.strftime("%Y-%m-%dT%H:%M:%SZ")
                 }
             )
-            line_item_id += 1
         if search_page:
             prev = str(int(search_page) - 1) if int(search_page) > 0 else ""
             next_page = str(int(search_page) + 1) if len(results) == 5 else ""
@@ -126,20 +126,6 @@ def search_orders(
             "results": results
         }
         return response
-
-    # return {
-    #     "previous": "",
-    #     "next": "",
-    #     "results": [
-    #         {
-    #             "line_item_id": 1,
-    #             "item_sku": "1 oblivion potion",
-    #             "customer_name": "Scaramouche",
-    #             "line_item_total": 50,
-    #             "timestamp": "2021-01-01T00:00:00Z",
-    #         }
-    #     ],
-    # }
 
 
 class Customer(BaseModel):
