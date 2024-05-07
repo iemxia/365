@@ -117,9 +117,12 @@ def search_orders(
             )
         if search_page:
             prev = str(int(search_page) - 1) if int(search_page) > 0 else ""
-            next_page = str(int(search_page) + 1) if len(results) == 5 else ""
+            next_page = str(int(search_page) + 1) if len(results) >= 5 else ""
             if len(results) < 5:
                 next_page = ""
+        else:
+            next_page =  "1" if len(results) >= 5 else ""
+            
         response = {
             "previous": prev,
             "next": next_page,
