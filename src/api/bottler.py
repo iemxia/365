@@ -200,7 +200,7 @@ def get_bottle_plan():
                     "potion_type": potion_type,
                     "quantity": potions_to_make
                 })
-                available_to_make -= to_make
+                available_to_make -= potions_to_make
                 red_ml -= red_ml_needed * potions_to_make
                 green_ml -= green_ml_needed * potions_to_make
                 blue_ml -= blue_ml_needed * potions_to_make
