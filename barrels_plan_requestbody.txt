@@ -19,48 +19,30 @@
     "quantity": 10
   },
 {
-    "sku": "MEDIUM_GREEN_BARREL",
-    "ml_per_barrel": 2500,
+    "sku": "LARGE_GREEN_BARREL",
+    "ml_per_barrel": 10000,
     "potion_type": [
       0, 100, 0, 0
     ],
-    "price": 250,
+    "price": 400,
     "quantity": 10
   },
 {
-    "sku": "MEDIUM_RED_BARREL",
-    "ml_per_barrel": 2500,
+    "sku": "LARGE_RED_BARREL",
+    "ml_per_barrel": 10000,
     "potion_type": [
       100, 0, 0, 0
     ],
-    "price": 250,
+    "price": 500,
     "quantity": 10
   },
 {
-    "sku": "SMALL_BLUE_BARREL",
-    "ml_per_barrel": 500,
+    "sku": "LARGE_BLUE_BARREL",
+    "ml_per_barrel": 10000,
     "potion_type": [
       0, 0, 100, 0
     ],
-    "price": 120,
-    "quantity": 10
-  },
-{
-    "sku": "SMALL_RED_BARREL",
-    "ml_per_barrel": 500,
-    "potion_type": [
-      100, 0, 0, 0
-    ],
-    "price": 100,
-    "quantity": 10
-  },
-{
-    "sku": "SMALL_GREEN_BARREL",
-    "ml_per_barrel": 500,
-    "potion_type": [
-      0, 100, 0, 0
-    ],
-    "price": 100,
+    "price": 600,
     "quantity": 10
   }
 ]

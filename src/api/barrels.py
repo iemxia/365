@@ -92,12 +92,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         total_ml = green_ml + blue_ml + red_ml + dark_ml
         print("Total ml: ", total_ml)
         dark_exist = False
+        large_exist = False
         ml_per_color = (ml_capacity - dark_ml) / 3
         # Uncomment below once rich:
-        # for barrel in wholesale_catalog:
-        #     if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
-        #         ml_per_color = (ml_capacity - 10000) / 4
-        #         dark_exist = True
+        for barrel in wholesale_catalog:
+            if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
+                ml_per_color = ml_capacity / 4
+                dark_exist = True
+            if "LARGE" in barrel.sku:
+                large_exist = True
         print("ml per color:", ml_per_color)
         print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         gold_to_spend = 0
@@ -110,7 +113,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 700
-        if (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
+        if large_exist and (gold - gold_to_spend) >= 400 and (green_ml <= (ml_per_color - 10000)):
+            res.append(
+                {
+                    "sku": "LARGE_GREEN_BARREL",
+                    "quantity": 1
+                }
+            )
+            gold_to_spend += 400
+        elif (gold - gold_to_spend) >= 500 and (green_ml <= (ml_per_color - 5000)):
+            res.append(
+                {
+                    "sku": "MEDIUM_GREEN_BARREL",
+                    "quantity": 2
+                }
+            )
+            gold_to_spend += 500
+        elif (gold - gold_to_spend) >= 250 and (green_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_GREEN_BARREL",
@@ -134,7 +153,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 100
-        if ((gold - gold_to_spend) >= 300) and (blue_ml <= (ml_per_color - 2500)):
+        if large_exist and (gold - gold_to_spend) >= 600 and (blue_ml <= (ml_per_color - 10000)):
+            res.append(
+                {
+                    "sku": "LARGE_BLUE_BARREL",
+                    "quantity": 1
+                }
+            )
+            gold_to_spend += 600
+        elif ((gold - gold_to_spend) >= 600) and (blue_ml <= (ml_per_color - 5000)):
+            res.append(
+                {
+                    "sku": "MEDIUM_BLUE_BARREL",
+                    "quantity": 2
+                }
+            )
+            gold_to_spend += 600
+        elif ((gold - gold_to_spend) >= 300) and (blue_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_BLUE_BARREL",
@@ -158,8 +193,23 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 }
             )
             gold_to_spend += 120 
-        print(gold - gold_to_spend)
-        if (gold - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
+        if large_exist and (gold - gold_to_spend) >= 500 and (red_ml <= (ml_per_color - 10000)):
+            res.append(
+                {
+                    "sku": "LARGE_RED_BARREL",
+                    "quantity": 1
+                }
+            )
+            gold_to_spend += 500
+        elif (gold - gold_to_spend) >= 500 and (red_ml <= (ml_per_color - 5000)):
+            res.append(
+                {
+                    "sku": "MEDIUM_RED_BARREL",
+                    "quantity": 2
+                }
+            )
+            gold_to_spend += 500
+        elif (gold - gold_to_spend) >= 250 and (red_ml <= (ml_per_color - 2500)):
             res.append(
                 {
                     "sku": "MEDIUM_RED_BARREL",
