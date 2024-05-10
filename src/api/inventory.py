@@ -44,8 +44,8 @@ def get_capacity_plan():
         capacity_results = connection.execute(sqlalchemy.text('SELECT ml_capacity, potion_capacity FROM capacity')).fetchone()
     if gold >= 9000:
         return {
-        "potion_capacity": 2,
-        "ml_capacity": 2
+        "potion_capacity": 4,
+        "ml_capacity": 4
         }
     elif gold >= 2300:
         return {
