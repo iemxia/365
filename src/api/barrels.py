@@ -73,7 +73,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
     return "OK"
 
 # Gets called once a day
-# log the wholesale catalog and look for pattern
 # SMALL_GREEN and SMALL_RED barrels: 500 mL and cost 100 gold
 # SMALL_BLUE: 500 mL cost 120 gold
 # MEDIUM_RED and GREEN: 2500 mL cost 250 gold
