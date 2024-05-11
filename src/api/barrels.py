@@ -115,7 +115,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if large_exist and dark_exist:
                 large_dark_needed = calculate_barrels(ml_per_color, 10000, dark_ml, gold - gold_to_spend, 700)
                 if large_dark_needed > 0:
-                    res.append({"sku": "LARGE_DARK_BARREL", "quantity": large_dark_needed})
+                    res.append({"sku": "LARGE_DARK_BARREL", "quantity": int(large_dark_needed)})
                     gold_to_spend += large_dark_needed * 700
                     dark_ml += large_dark_needed * 10000
         # replenish green ml
@@ -123,15 +123,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if large_exist:
                 large_green_needed = calculate_barrels(ml_per_color, 10000, green_ml, gold - gold_to_spend, 400)
                 if large_green_needed > 0:
-                    res.append({"sku": "LARGE_GREEN_BARREL", "quantity": large_green_needed})
+                    res.append({"sku": "LARGE_GREEN_BARREL", "quantity": int(large_green_needed)})
                     gold_to_spend += large_green_needed * 400
                     green_ml += large_green_needed * 10000
             medium_green_needed = calculate_barrels(ml_per_color, 2500, green_ml, gold - gold_to_spend, 250)
-            res.append({"sku": "MEDIUM_GREEN_BARREL", "quantity": medium_green_needed})
+            res.append({"sku": "MEDIUM_GREEN_BARREL", "quantity": int(medium_green_needed)})
             gold_to_spend += medium_green_needed * 250
             green_ml += medium_green_needed * 2500
             small_green_needed = calculate_barrels(ml_per_color, 500, green_ml, gold - gold_to_spend, 100)
-            res.append({"sku": "SMALL_GREEN_BARREL", "quantity": small_green_needed})
+            res.append({"sku": "SMALL_GREEN_BARREL", "quantity": int(small_green_needed)})
             gold_to_spend += small_green_needed * 100
             green_ml += small_green_needed * 500
 
@@ -140,15 +140,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if large_exist:
                 large_blue_needed = calculate_barrels(ml_per_color, 10000, blue_ml, gold - gold_to_spend, 600)
                 if large_blue_needed > 0:
-                    res.append({"sku": "LARGE_BLUE_BARREL", "quantity": large_blue_needed})
+                    res.append({"sku": "LARGE_BLUE_BARREL", "quantity": int(large_blue_needed)})
                     gold_to_spend += large_blue_needed * 600
                     blue_ml += large_blue_needed * 10000
             medium_blue_needed = calculate_barrels(ml_per_color, 2500, blue_ml, gold - gold_to_spend, 300)
-            res.append({"sku": "MEDIUM_BLUE_BARREL", "quantity": medium_blue_needed})
+            res.append({"sku": "MEDIUM_BLUE_BARREL", "quantity": int(medium_blue_needed)})
             gold_to_spend += medium_blue_needed * 300
             blue_ml += medium_blue_needed * 2500
             small_blue_needed = calculate_barrels(ml_per_color, 500, blue_ml, gold - gold_to_spend, 120)
-            res.append({"sku": "SMALL_BLUE_BARREL", "quantity": small_blue_needed})
+            res.append({"sku": "SMALL_BLUE_BARREL", "quantity": int(small_blue_needed)})
             gold_to_spend += small_blue_needed * 120
             blue_ml += small_blue_needed * 500
         
@@ -157,15 +157,15 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             if large_exist:
                 large_red_needed = calculate_barrels(ml_per_color, 10000, red_ml, gold - gold_to_spend, 500)
                 if large_red_needed > 0:
-                    res.append({"sku": "LARGE_RED_BARREL", "quantity": large_red_needed})
+                    res.append({"sku": "LARGE_RED_BARREL", "quantity": int(large_red_needed)})
                     gold_to_spend += large_red_needed * 500
                     red_ml += large_red_needed * 10000
             medium_red_needed = calculate_barrels(ml_per_color, 2500, red_ml, gold - gold_to_spend, 250)
-            res.append({"sku": "MEDIUM_RED_BARREL", "quantity": medium_red_needed})
+            res.append({"sku": "MEDIUM_RED_BARREL", "quantity": int(medium_red_needed)})
             gold_to_spend += medium_red_needed * 250
             red_ml += medium_red_needed * 2500
             small_red_needed = calculate_barrels(ml_per_color, 500, red_ml, gold - gold_to_spend, 100)
-            res.append({"sku": "SMALL_RED_BARREL", "quantity": small_red_needed})
+            res.append({"sku": "SMALL_RED_BARREL", "quantity": int(small_red_needed)})
             gold_to_spend += small_red_needed * 100
             red_ml += small_red_needed * 500
         print("gold spent:", gold_to_spend)
