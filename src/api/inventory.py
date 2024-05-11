@@ -44,8 +44,8 @@ def get_capacity_plan():
     # uncomment this near to the end
     if gold >= 11000:
         return {
-        "potion_capacity": 4,
-        "ml_capacity": 4
+        "potion_capacity": 5,
+        "ml_capacity": 2
         }
     elif gold >= 4700:
         return {

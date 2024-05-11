@@ -173,6 +173,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         print(red_ml, green_ml, blue_ml, dark_ml)
         return res
 
+# Reuse this once I am past a certain time and don't wanna buy bunch of mL anymore
  # if large_exist and (gold - gold_to_spend) >= 400 and (green_ml <= (ml_per_color - 10000)):
         #     res.append(
         #         {
