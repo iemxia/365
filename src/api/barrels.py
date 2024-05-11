@@ -111,16 +111,13 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             max_barrels_gold = available_gold // (barrel_price)
             return max(0, min(max_barrels_capacity, max_barrels_gold))
         
-        if dark_exist and (gold >= 1000) and dark_ml <= 0 and ((ml_capacity - total_ml) >= 10000) :
-            res.append(
-                 {
-                    "sku": "LAGE_DARK_BARREL",
-                    "quantity": 1
-                }
-            )
-            gold_to_spend += 700
-            dark_ml += 10000
-        
+        if dark_ml < ml_per_color:
+            if large_exist and dark_exist:
+                large_dark_needed = calculate_barrels(ml_per_color, 10000, dark_ml, gold - gold_to_spend, 700)
+                if large_dark_needed > 0:
+                    res.append({"sku": "LARGE_DARK_BARREL", "quantity": large_dark_needed})
+                    gold_to_spend += large_dark_needed * 700
+                    dark_ml += large_dark_needed * 10000
         # replenish green ml
         if green_ml < ml_per_color:
             if large_exist:
@@ -136,7 +133,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             small_green_needed = calculate_barrels(ml_per_color, 500, green_ml, gold - gold_to_spend, 100)
             res.append({"sku": "SMALL_GREEN_BARREL", "quantity": small_green_needed})
             gold_to_spend += small_green_needed * 100
-            green_ml += medium_green_needed * 500
+            green_ml += small_green_needed * 500
 
         # Replenish blue mL
         if blue_ml < ml_per_color:
