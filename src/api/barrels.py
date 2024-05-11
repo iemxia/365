@@ -109,7 +109,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         def calculate_barrels(ml_needed, barrel_capacity, ml_color, available_gold, barrel_price):
             max_barrels_capacity = max(0, (ml_needed - ml_color) // barrel_capacity)
             max_barrels_gold = available_gold // (barrel_price)
-            return max(0, min(max_barrels_capacity, max_barrels_gold))
+            return max(0, min(max_barrels_capacity, max_barrels_gold, 10))
         
         if dark_ml < ml_per_color:
             if large_exist and dark_exist:
