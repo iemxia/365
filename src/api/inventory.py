@@ -41,18 +41,23 @@ def get_capacity_plan():
     with db.engine.begin() as connection:
         # gold = connection.execute(sqlalchemy.text('SELECT gold FROM global_inventory')).scalar_one()
         gold = connection.execute(sqlalchemy.text("SELECT SUM(gold_change) FROM gold_ledger_entries")).scalar()
-        capacity_results = connection.execute(sqlalchemy.text('SELECT ml_capacity, potion_capacity FROM capacity')).fetchone()
-    if gold >= 9000:
+    # uncomment this near to the end
+    if gold >= 11000:
         return {
         "potion_capacity": 4,
         "ml_capacity": 4
         }
-    elif gold >= 2300:
+    elif gold >= 4700:
+        return {
+        "potion_capacity": 2,
+        "ml_capacity": 2
+        }
+    elif gold >= 2500:
         return {
         "potion_capacity": 1,
         "ml_capacity": 1
         }
-    elif gold >= 1400:
+    elif gold >= 1500:
         return {
         "potion_capacity": 1,
         "ml_capacity": 0
