@@ -64,12 +64,6 @@ def post_deliver_barrels(barrels_delivered: list[Barrel], order_id: int):
                            [
                                {"transaction_id": tx_id, "gold_change": total_price * -1}
                            ])
-        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_green_ml = num_green_ml + :total_green_ml'), [{"total_green_ml": total_green_ml}])
-        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_red_ml = num_red_ml + :total_red_ml'), [{"total_red_ml": total_red_ml}])
-        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_blue_ml = num_blue_ml + :total_blue_ml'), [{"total_blue_ml": total_blue_ml}])
-        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET num_dark_ml = num_dark_ml + :total_dark_ml'), [{"total_dark_ml": total_dark_ml}])
-        # # update gold left
-        # connection.execute(sqlalchemy.text(f'UPDATE global_inventory SET gold = gold - :total_price'), [{"total_price": total_price}])
     print(f"barrels delievered: {barrels_delivered} order_id: {order_id}")
     return "OK"
 
@@ -93,6 +87,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         print("Total ml: ", total_ml)
         dark_exist = False
         large_exist = False
+
         ml_per_color = (ml_capacity - dark_ml) / 3
         # Uncomment below once rich:
         for barrel in wholesale_catalog:
@@ -101,10 +96,43 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
                 dark_exist = True
             if "LARGE" in barrel.sku:
                 large_exist = True
-        print("ml per color:", ml_per_color)
-        print(f"green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
+        
         gold_to_spend = 0
         res = []
+        def calculate_barrels(ml_needed, barrel_capacity, ml_color, available_gold, barrel_price):
+            max_barrels_capacity = max(0, (ml_needed - ml_color) // barrel_capacity)
+            max_barrels_gold = available_gold // (barrel_price)
+            return max(0, min(max_barrels_capacity, max_barrels_gold, 4))
+        
+        if green_ml < ml_per_color:
+            if large_exist:
+                large_green_needed = calculate_barrels(ml_per_color, 10000, green_ml, gold - gold_to_spend, 400)
+                if large_green_needed > 0:
+                    res.append({"sku": "LARGE_GREEN_BARREL", "quantity": int(large_green_needed)})
+                    gold_to_spend += large_green_needed * 400
+                    green_ml += large_green_needed * 10000
+        # Replenish blue mL
+        if blue_ml < ml_per_color:
+            if large_exist:
+                large_blue_needed = calculate_barrels(ml_per_color, 10000, blue_ml, gold - gold_to_spend, 600)
+                if large_blue_needed > 0:
+                    res.append({"sku": "LARGE_BLUE_BARREL", "quantity": int(large_blue_needed)})
+                    gold_to_spend += large_blue_needed * 600
+                    blue_ml += large_blue_needed * 10000
+        
+        # Replenish red mL
+        if red_ml < ml_per_color:
+            if large_exist:
+                large_red_needed = calculate_barrels(ml_per_color, 10000, red_ml, gold - gold_to_spend, 500)
+                if large_red_needed > 0:
+                    res.append({"sku": "LARGE_RED_BARREL", "quantity": int(large_red_needed)})
+                    gold_to_spend += large_red_needed * 500
+                    red_ml += large_red_needed * 10000
+            
+        print("ml per color:", ml_per_color)
+        print(f"new mL amount: green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
+        print("Gold spent: ", gold_to_spend)
+        return res
         # if large_exist and (gold - gold_to_spend) >= 400 and (green_ml <= (ml_per_color - 10000)):
         #     res.append(
         #         {
@@ -293,10 +321,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #         res.append({"sku": "SMALL_RED_BARREL", "quantity": int(small_red_needed)})
         #         gold_to_spend += small_red_needed * 100
         #         red_ml += small_red_needed * 500
-        print("gold spent:", gold_to_spend)
-        print("New ml amount: ", red_ml + green_ml + blue_ml + dark_ml)
-        print(red_ml, green_ml, blue_ml, dark_ml)
-        return res
+        
 
 # Reuse this once I am past a certain time and don't wanna buy bunch of mL anymore
  
