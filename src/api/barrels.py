@@ -88,7 +88,7 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         dark_exist = False
         large_exist = False
 
-        ml_per_color = (ml_capacity - dark_ml) / 3
+        ml_per_color = (ml_capacity - dark_ml) / 4
         # Uncomment below once rich:
         for barrel in wholesale_catalog:
             if barrel.potion_type == [0, 0, 0, 1] and (ml_capacity - total_ml >= 10000):
