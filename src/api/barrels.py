@@ -103,50 +103,50 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
             max_barrels_capacity = max(0, (ml_needed - ml_color) // barrel_capacity)
             max_barrels_gold = available_gold // (barrel_price)
             return max(0, min(max_barrels_capacity, max_barrels_gold, 5))
-        
-          # replenish green ml
-        if green_ml < ml_per_color:
-            if large_exist:
-                large_green_needed = calculate_barrels(ml_per_color, 10000, green_ml, gold - gold_to_spend, 400)
-                if large_green_needed > 0:
-                    res.append({"sku": "LARGE_GREEN_BARREL", "quantity": int(large_green_needed)})
-                    gold_to_spend += large_green_needed * 400
-                    green_ml += large_green_needed * 10000
-            medium_green_needed = calculate_barrels(ml_per_color, 2500, green_ml, gold - gold_to_spend, 250)
-            if medium_green_needed > 0:
-                res.append({"sku": "MEDIUM_GREEN_BARREL", "quantity": int(medium_green_needed)})
-                gold_to_spend += medium_green_needed * 250
-                green_ml += medium_green_needed * 2500
-         
+        if total_ml < 40000:
+            # replenish green ml
+            if green_ml < ml_per_color:
+                if large_exist:
+                    large_green_needed = calculate_barrels(ml_per_color, 10000, green_ml, gold - gold_to_spend, 400)
+                    if large_green_needed > 0:
+                        res.append({"sku": "LARGE_GREEN_BARREL", "quantity": int(large_green_needed)})
+                        gold_to_spend += large_green_needed * 400
+                        green_ml += large_green_needed * 10000
+                medium_green_needed = calculate_barrels(ml_per_color, 2500, green_ml, gold - gold_to_spend, 250)
+                if medium_green_needed > 0:
+                    res.append({"sku": "MEDIUM_GREEN_BARREL", "quantity": int(medium_green_needed)})
+                    gold_to_spend += medium_green_needed * 250
+                    green_ml += medium_green_needed * 2500
+            
 
-        # Replenish blue mL
-        if blue_ml < ml_per_color:
-            if large_exist:
-                large_blue_needed = calculate_barrels(ml_per_color, 10000, blue_ml, gold - gold_to_spend, 600)
-                if large_blue_needed > 0:
-                    res.append({"sku": "LARGE_BLUE_BARREL", "quantity": int(large_blue_needed)})
-                    gold_to_spend += large_blue_needed * 600
-                    blue_ml += large_blue_needed * 10000
-            medium_blue_needed = calculate_barrels(ml_per_color, 2500, blue_ml, gold - gold_to_spend, 300)
-            if medium_blue_needed > 0:
-                res.append({"sku": "MEDIUM_BLUE_BARREL", "quantity": int(medium_blue_needed)})
-                gold_to_spend += medium_blue_needed * 300
-                blue_ml += medium_blue_needed * 2500
-          
-        # Replenish red mL
-        if red_ml < ml_per_color:
-            if large_exist:
-                large_red_needed = calculate_barrels(ml_per_color, 10000, red_ml, gold - gold_to_spend, 500)
-                if large_red_needed > 0:
-                    res.append({"sku": "LARGE_RED_BARREL", "quantity": int(large_red_needed)})
-                    gold_to_spend += large_red_needed * 500
-                    red_ml += large_red_needed * 10000
-            medium_red_needed = calculate_barrels(ml_per_color, 2500, red_ml, gold - gold_to_spend, 250)
-            if medium_red_needed > 0:
-                res.append({"sku": "MEDIUM_RED_BARREL", "quantity": int(medium_red_needed)})
-                gold_to_spend += medium_red_needed * 250
-                red_ml += medium_red_needed * 2500
-          
+            # Replenish blue mL
+            if blue_ml < ml_per_color:
+                if large_exist:
+                    large_blue_needed = calculate_barrels(ml_per_color, 10000, blue_ml, gold - gold_to_spend, 600)
+                    if large_blue_needed > 0:
+                        res.append({"sku": "LARGE_BLUE_BARREL", "quantity": int(large_blue_needed)})
+                        gold_to_spend += large_blue_needed * 600
+                        blue_ml += large_blue_needed * 10000
+                medium_blue_needed = calculate_barrels(ml_per_color, 2500, blue_ml, gold - gold_to_spend, 300)
+                if medium_blue_needed > 0:
+                    res.append({"sku": "MEDIUM_BLUE_BARREL", "quantity": int(medium_blue_needed)})
+                    gold_to_spend += medium_blue_needed * 300
+                    blue_ml += medium_blue_needed * 2500
+            
+            # Replenish red mL
+            if red_ml < ml_per_color:
+                if large_exist:
+                    large_red_needed = calculate_barrels(ml_per_color, 10000, red_ml, gold - gold_to_spend, 500)
+                    if large_red_needed > 0:
+                        res.append({"sku": "LARGE_RED_BARREL", "quantity": int(large_red_needed)})
+                        gold_to_spend += large_red_needed * 500
+                        red_ml += large_red_needed * 10000
+                medium_red_needed = calculate_barrels(ml_per_color, 2500, red_ml, gold - gold_to_spend, 250)
+                if medium_red_needed > 0:
+                    res.append({"sku": "MEDIUM_RED_BARREL", "quantity": int(medium_red_needed)})
+                    gold_to_spend += medium_red_needed * 250
+                    red_ml += medium_red_needed * 2500
+            
             
         print("ml per color:", ml_per_color)
         print(f"new mL amount: green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
