@@ -184,9 +184,7 @@ def get_bottle_plan():
         for potion_id, count in num_potions.items():
             potion_type = tuple(potion_res[potion_id])
             potion_counts[potion_type] = count
-        print("Potion counts dictionary", potion_counts)
         sorted_potions = sorted(potion_counts.keys(), key=lambda x: potion_counts[x])
-        print("sorted potions", sorted_potions)
         for potion_type in sorted_potions:
             potion_id = next(key for key, value in potion_res.items() if value == list(potion_type))
             red_ml_needed, green_ml_needed, blue_ml_needed, dark_ml_needed = potion_type
