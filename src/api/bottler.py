@@ -191,7 +191,12 @@ def get_bottle_plan():
             potion_id = next(key for key, value in potion_res.items() if value == list(potion_type))
             red_ml_needed, green_ml_needed, blue_ml_needed, dark_ml_needed = potion_type
             if (red_ml >= red_ml_needed) and (green_ml >= green_ml_needed) and (blue_ml >= blue_ml_needed) and (dark_ml >= dark_ml_needed):
-                potions_to_make = min(available_to_make, max(available_to_make, absolute_max - num_potions[potion_id]))
+                potions_to_make = min(available_to_make, 
+                                    max(available_to_make, absolute_max - num_potions[potion_id]), 
+                                    (red_ml // red_ml_needed if red_ml_needed > 0 else available_to_make),
+                                    (green_ml // green_ml_needed if green_ml_needed > 0 else available_to_make),
+                                    (blue_ml // blue_ml_needed if blue_ml_needed > 0 else available_to_make),
+                                    (dark_ml // dark_ml_needed if dark_ml_needed > 0 else available_to_make))
                 print(potions_to_make, potion_id)
                 if potions_to_make > 0:
                     res.append({
