@@ -102,8 +102,8 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         def calculate_barrels(ml_needed, barrel_capacity, ml_color, available_gold, barrel_price):
             max_barrels_capacity = max(0, (ml_needed - ml_color) // barrel_capacity)
             max_barrels_gold = available_gold // (barrel_price)
-            return max(0, min(max_barrels_capacity, max_barrels_gold, 7))
-        if total_ml < 60000:
+            return max(0, min(max_barrels_capacity, max_barrels_gold, 4))
+        if total_ml < 30000:
             if green_ml < ml_per_color:
                 if large_exist:
                     large_green_needed = calculate_barrels(ml_per_color, 10000, green_ml, gold - gold_to_spend, 400)
