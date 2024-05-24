@@ -142,7 +142,6 @@ def get_wholesale_purchase_plan(wholesale_catalog: list[Barrel]):
         #             res.append({"sku": "MEDIUM_RED_BARREL", "quantity": int(medium_red_needed)})
         #             gold_to_spend += medium_red_needed * 250
         #             red_ml += medium_red_needed * 2500
-                
         print("ml per color:", ml_per_color)
         print(f"new mL amount: green: {green_ml}, red: {red_ml}, blue: {blue_ml}, gold: {gold}, dark: {dark_ml}")
         print("new total:", green_ml + red_ml + blue_ml + dark_ml)
